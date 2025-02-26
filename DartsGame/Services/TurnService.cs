@@ -104,14 +104,18 @@ namespace DartsGame.Services
             await _turnRepository.Delete(turnId);
         }
 
-     
 
 
-        public async Task ChangeTurn(Match match, TurnThrow turnThrows)
+
+        public async Task ChangeTurn(Match match, TurnThrowDTOstring turnThrows)
         {
+            // Get all players in the match
+            var activePlayers = await _context.PlayerMatches
+                .Where(pm => pm.MatchId == match.MatchId)
+                .Select(pm => pm.PlayerId)
+                .ToListAsync();
 
-            var activePlayers = await _context.PlayerMatches.Where(pm => pm.MatchId == match.MatchId).Select(pm => pm.PlayerId).ToListAsync();
-
+            // Get current leg
             var currentLeg = match.Sets.LastOrDefault()?.Legs.LastOrDefault();
             if (currentLeg == null)
             {
@@ -122,32 +126,34 @@ namespace DartsGame.Services
                 throw new InvalidOperationException("The current leg is already finished.");
             }
 
+            // Validate throws
             if (turnThrows.Throw1 == null || turnThrows.Throw2 == null || turnThrows.Throw3 == null)
             {
                 throw new ArgumentException("All three throws are required to complete the turn.");
             }
 
-            int throw1Score = ScoreTable.GetScore(turnThrows.Throw1.ToString());
-            int throw2Score = ScoreTable.GetScore(turnThrows.Throw2.ToString());
-            int throw3Score = ScoreTable.GetScore(turnThrows.Throw3.ToString());
+            // Get the current turn (which should be the active player's turn)
+            var currentTurn = await _context.Turns
+                .Where(t => t.LegId == currentLeg.LegId && !t.IsDeleted)
+                .OrderByDescending(t => t.TimeStamp)
+                .FirstOrDefaultAsync();
+
+            if (currentTurn == null)
+            {
+                throw new InvalidOperationException("No active turn found.");
+            }
+
+            // Calculate scores
+            int throw1Score = ScoreTable.GetScore(turnThrows.Throw1);
+            int throw2Score = ScoreTable.GetScore(turnThrows.Throw2);
+            int throw3Score = ScoreTable.GetScore(turnThrows.Throw3);
             int totalScore = throw1Score + throw2Score + throw3Score;
 
-            var currentTurn = await _context.Turns.Where(t => t.LegId == currentLeg.LegId && !t.IsDeleted).OrderByDescending(t => t.TimeStamp).FirstOrDefaultAsync();
-
-            var turn = new Turn(
-                Guid.NewGuid(),
-                activePlayers.FirstOrDefault(),
-                currentLeg.LegId,
-                DateTime.UtcNow,
-                false,
-                false,
-                false
-                );
-
+            // Create turn throw record for the CURRENT turn
             var turnThrow = new TurnThrow
             {
                 TurnThrowId = Guid.NewGuid(),
-                TurnId = currentTurn.TurnId,
+                TurnId = currentTurn.TurnId,  // This is correct - we're adding throws to the current turn
                 Throw1 = throw1Score,
                 Throw2 = throw2Score,
                 Throw3 = throw3Score,
@@ -155,33 +161,36 @@ namespace DartsGame.Services
                 IsDeleted = false
             };
 
-            _context.Turns.Add(turn);
             _context.TurnThrows.Add(turnThrow);
             await _context.SaveChangesAsync();
 
+            // Update game state based on these throws
             await _gameService.ValidateLegCompletion(currentLeg, totalScore, turnThrows.Throw3.ToString());
 
-            var currentPlayerId = activePlayers.FirstOrDefault();
-            var currentPlayerIndex = activePlayers.IndexOf(currentPlayerId);
+            // If the leg isn't finished after validation, create a turn for the next player
+            if (!currentLeg.IsFinished)
+            {
+                // Determine the next player
+                var currentPlayerId = currentTurn.PlayerId;
+                var currentPlayerIndex = activePlayers.IndexOf(currentPlayerId);
+                var nextPlayerId = activePlayers[(currentPlayerIndex + 1) % activePlayers.Count];
 
-            var nextPlayerId = activePlayers[(currentPlayerIndex + 1) % activePlayers.Count];
+                // Create new turn for the next player
+                var newTurn = new Turn(
+                    Guid.NewGuid(),
+                    nextPlayerId,
+                    currentLeg.LegId,
+                    DateTime.UtcNow,
+                    false,
+                    false,
+                    false
+                );
 
-            var newTurn = new Turn(
-                Guid.NewGuid(),
-                nextPlayerId,
-                currentLeg.LegId,
-                DateTime.UtcNow,
-                false,
-                false,
-                false
-            );
-
-            _context.Turns.Add(newTurn);
-
-            await _context.SaveChangesAsync();
-
+                _context.Turns.Add(newTurn);
+                await _context.SaveChangesAsync();
+            }
         }
 
-       
+
     }
 }

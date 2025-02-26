@@ -110,6 +110,7 @@ namespace DartsGame.Services
             {
                 return true;
             }
+
             return false;
         }
 
@@ -149,6 +150,7 @@ namespace DartsGame.Services
             var match = await _context.Matches.FindAsync(set.MatchId);
             var players = await _context.PlayerMatches.Where(m => m.MatchId == match.MatchId).Select(m => m.PlayerId).ToListAsync();
 
+           
 
             // Check if we need a new leg or if the set is complete
             var legsNeededToWin = (int)Math.Ceiling((double)set.BestOfLegs / 2);
@@ -243,7 +245,7 @@ namespace DartsGame.Services
 
         private async Task CheckSetCompletion(Guid setId)
         {
-            var set = await _context.Sets.Include(s => s.SetId == setId).FirstOrDefaultAsync();
+            var set = await _context.Sets.Include(s => s.Legs).FirstOrDefaultAsync(s => s.SetId == setId);
 
             if (set == null)
             {
