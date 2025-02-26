@@ -1,8 +1,7 @@
-﻿namespace DartsGame.RequestDTOs
+﻿namespace DartsGame.DTO
 {
-    public class ChangeTurnRequest
+    public class TurnThrowDTOstring
     {
-        public Guid MatchId { get; set; }
         public string Throw1 { get; set; }
         public string Throw2 { get; set; }
         public string Throw3 { get; set; }

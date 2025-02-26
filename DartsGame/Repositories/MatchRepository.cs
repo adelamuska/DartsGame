@@ -10,7 +10,9 @@ namespace DartsGame.Repositories
 
         public async Task<Match> GetById(Guid matchId)
         {
-            return await _context.Matches.Include(m => m.Sets).ThenInclude(s => s.Legs) .FirstOrDefaultAsync(m => m.MatchId == matchId);
+            return await _context.Matches.Include(m => m.Sets).ThenInclude(s => s.Legs) .FirstOrDefaultAsync(m => m.MatchId == matchId && !m.IsDeleted);
         }
+
+
     }
 }

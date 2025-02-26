@@ -140,14 +140,14 @@ namespace DartsGame.Controllers
                     return BadRequest(ModelState);
                 }
 
+                // Get match with necessary navigation properties included
                 var match = await _matchRepository.GetById(request.MatchId);
                 if (match == null)
                 {
                     return NotFound($"Match with ID {request.MatchId} not found.");
                 }
 
-
-                var turnThrows = new TurnThrow
+                var turnThrows = new TurnThrowDTOstring
                 {
                     Throw1 = request.Throw1,
                     Throw2 = request.Throw2,
