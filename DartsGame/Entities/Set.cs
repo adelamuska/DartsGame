@@ -1,10 +1,12 @@
-﻿namespace DartsGame.Entities
+﻿using DartsGame.Enums;
+
+namespace DartsGame.Entities
 {
     public class Set : ISoftDeletable
     {
         public Guid SetId { get; set; }
         public Guid MatchId { get; set; }
-        public int BestOfLegs { get; set; }
+        public BestOfLegs BestOfLegs { get; set; }
         public int SetNumber { get; set; }
         public bool IsFinished {  get; set; }
         public bool IsDeleted { get; set; }

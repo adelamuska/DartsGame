@@ -3,11 +3,12 @@ using DartsGame.Data;
 using DartsGame.DTO;
 using DartsGame.Entities;
 using DartsGame.Enums;
+using DartsGame.Interfaces;
 using DartsGame.Repositories;
 
 namespace DartsGame.Services
 {
-    public class MatchService
+    public class MatchService : IMatchService
     {
         private readonly AppDbContext _context;
         public readonly MatchRepository _matchRepository;
@@ -104,7 +105,7 @@ namespace DartsGame.Services
 
 
 
-        public async Task<Match> StartMatch(int score, int sets, int numberOfPlayers, List<string> playerNames)
+        public async Task<Match> StartMatch(int score, int sets, int legs, int numberOfPlayers, List<string> playerNames)
         {
             if (!Enum.IsDefined(typeof(StartingScore), score))
             {
@@ -118,12 +119,18 @@ namespace DartsGame.Services
             }
             var numberOfSets = (BestOfSets)sets;
 
+            if(!Enum.IsDefined(typeof(BestOfLegs), legs))
+            {
+                throw new ArgumentException($"Invalid number of sets {legs}");
+            }
+            var numberOfLegs = (BestOfLegs)legs;
+
             if (numberOfPlayers > 6 || numberOfPlayers < 1)
             {
                 throw new ArgumentException("Number of players should be between 1 and 6.");
             }
 
-            var matchId = Guid.NewGuid(); 
+            var matchId = Guid.NewGuid();
             var matchPlayers = new Dictionary<Guid, string>();
 
             foreach (var playerName in playerNames)
@@ -146,16 +153,17 @@ namespace DartsGame.Services
             }
 
             var matchDTO = new MatchDTO(
-                matchId,
-                DateTime.UtcNow,
-                null,
-                numberOfSets,
-                startingScore,
-                false
-            );
+                   matchId,
+                   DateTime.UtcNow,
+                   null,
+                   numberOfSets,
+                   startingScore,
+                   false
+               );
 
             var match = await AddMatch(matchDTO);
 
+            
             foreach (var playerId in matchPlayers.Keys)
             {
                 var playerMatch = new PlayerMatch()
@@ -167,20 +175,55 @@ namespace DartsGame.Services
                 _context.PlayerMatches.Add(playerMatch);
             }
 
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
 
             
             var newSet = new Set(Guid.NewGuid())
             {
                 MatchId = matchId,
-                SetNumber = 1
+                SetNumber = 1,
+                BestOfLegs = numberOfLegs, 
+                IsFinished = false
             };
 
             _context.Sets.Add(newSet);
             await _context.SaveChangesAsync();
 
+            var firstLeg = new Leg(
+                Guid.NewGuid(),
+                newSet.SetId,
+                1,
+                false
+            );
+
+            _context.Legs.Add(firstLeg);
+
+            foreach (var playerId in matchPlayers.Keys)
+            {
+                var legScore = new LegScore
+                {
+                    LegId = firstLeg.LegId,
+                    PlayerId = playerId,
+                    RemainingScore = (int)startingScore
+                };
+
+                _context.LegScores.Add(legScore);
+            }
+
+            var initialTurn = new Turn(
+                Guid.NewGuid(),
+                matchPlayers.Keys.First(),
+                firstLeg.LegId,
+                DateTime.UtcNow,
+                false,
+                false,
+                false
+            );
+
+            _context.Turns.Add(initialTurn);
+            await _context.SaveChangesAsync();
+
             return _mapper.Map<Match>(match);
         }
-
     }
 }
