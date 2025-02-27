@@ -1,4 +1,5 @@
-﻿using DartsGame.Data;
+﻿using DartsGame.Entities;
+using DartsGame.Repositories;
 using DartsGame.RequestDTOs;
 using DartsGame.Services;
 using Microsoft.AspNetCore.Http;
@@ -11,66 +12,159 @@ namespace DartsGame.Controllers
     public class GameController : ControllerBase
     {
 
-        private readonly GameService _gameService;
-        private readonly AppDbContext _context;
+        private readonly MatchService _matchService;
+        private readonly TurnService _turnService;
+        private readonly MatchRepository _matchRepository;
 
-        public GameController(GameService gameService, AppDbContext context)
+        public GameController(MatchService matchService,TurnService turnService, MatchRepository matchRepository)
         {
-            _gameService = gameService;
-            _context = context;
+            _matchService = matchService;
+            _turnService = turnService;
+            _matchRepository = matchRepository;
         }
 
-
-        [HttpPost("validate-leg-completion")]
-        public async Task<IActionResult> ValidateLegCompletion([FromBody] ValidateLegCompletionRequest request)
+        [HttpPost("start")]
+        public async Task<IActionResult> StartMatch([FromBody] StartMatchRequest request)
         {
-
-            var currentLeg = await _context.Legs.FindAsync(request.LegId);
-            if (currentLeg == null) { 
-                return NotFound("Leg not found");
-            }
-
-            await _gameService.ValidateLegCompletion(currentLeg, request.TurnScore, request.LastThrow);
-            return Ok();
-        }
-
-        [HttpPost("create-new-leg")]
-        public async Task<IActionResult> CreateNewLegIfNeeded([FromBody] Guid setId)
-        {
-            await _gameService.CreateNewLegIfNeeded(setId);
-            return Ok();
-
-        }
-
-        [HttpPost("check-set-completion")]
-        public async Task<IActionResult> CheckSetCompletion([FromBody] Guid setId)
-        {
-            await _gameService.CreateNewLegIfNeeded(setId);
-            return Ok();
-        }
-
-        [HttpPost("check-match-completion")]
-        public async Task<IActionResult> CheckMatchCompletion([FromBody] Guid matchId)
-        {
-            var match = await _context.Matches.FindAsync(matchId);
-            if (match == null)
+            try
             {
-                return NotFound("Match not found");
+                if (request == null || request.PlayerNames == null || request.PlayerNames.Count == 0)
+                {
+                    return BadRequest("Player names are required.");
+                }
+
+                var match = await _matchService.StartMatch(
+                    request.StartingScore,
+                    request.BestOfSets,
+                    request.BestOfLegs,
+                    request.PlayerNames.Count,
+                    request.PlayerNames);
+
+                return Ok(new
+                {
+                    match.MatchId,
+                    Message = "Game started successfully."
+                });
             }
-
-            return Ok();
-        }
-
-        [HttpPost("create-new-set")]
-        public async Task<IActionResult> CreateNewSetIfNeeded([FromBody] Guid matchId)
-        {
-
-            var match = await _context.Matches.FindAsync(matchId);
-            if (match == null)
+            catch (ArgumentException ex)
             {
-                return NotFound("Match not found.");
+                return BadRequest(ex.Message);
             }
-            return Ok();
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
+
+        [HttpGet("match/{matchId}")]
+        public async Task<IActionResult> GetMatch(Guid matchId)
+        {
+            try
+            {
+                var match = await _matchService.GetById(matchId);
+                return Ok(match);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("throw")]
+        public async Task<IActionResult> ProcessTurn([FromBody] ProcessTurnRequest request)
+        {
+            try
+            {
+                var match = await _matchRepository.GetById(request.MatchId);
+                if (match == null)
+                {
+                    return NotFound($"Match with ID {request.MatchId} not found.");
+                }
+
+                if (match.IsFinished)
+                {
+                    return BadRequest("This match is already finished.");
+                }
+           
+
+                await _turnService.ChangeTurn(match, request.TurnThrows);
+
+                return Ok(new { Message = "Turn processed successfully." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("currentstate/{matchId}")]
+        public async Task<IActionResult> GetGameState(Guid matchId)
+        {
+            try
+            {
+                var match = await _matchService.GetById(matchId);
+                if (match == null)
+                {
+                    return NotFound($"Match with ID {matchId} not found.");
+                }
+
+                
+                var currentSet = match.Sets?.OrderByDescending(s => s.SetNumber)
+                    .FirstOrDefault(s => !s.IsFinished);
+
+                
+                var currentLeg = currentSet?.Legs?.OrderByDescending(l => l.LegNumber)
+                    .FirstOrDefault(l => !l.IsFinished);
+
+                if (currentLeg == null)
+                {
+                    return Ok(new
+                    {
+                         match.MatchId,
+                         match.IsFinished,
+                         match.WinnerPlayerId,
+                        Status = "Match completed"
+                    });
+                }
+
+                var currentTurn = currentLeg.Turns?.OrderByDescending(t => t.TimeStamp)
+                    .FirstOrDefault(t => !t.IsDeleted);
+
+                var playerScores = currentLeg.LegScores;
+
+                return Ok(new
+                {
+                    match.MatchId,
+                    CurrentSetNumber = currentSet.SetNumber,
+                    CurrentLegNumber = currentLeg.LegNumber,
+                    CurrentPlayerId = currentTurn?.PlayerId,
+                    PlayerScores = playerScores,
+                    SetScores = match.Sets.SelectMany(s => s.SetResults)
+                        .GroupBy(sr => sr.PlayerId)
+                        .Select(g => new {
+                            PlayerId = g.Key,
+                            SetsWon = g.Count(sr => sr.SetId == sr.Set.SetId && sr.Set.WinnerPlayerId == g.Key)
+                        })
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
     }
 }
+

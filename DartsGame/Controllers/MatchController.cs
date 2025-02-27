@@ -121,29 +121,6 @@ namespace DartsGame.Controllers
             }
         }
 
-        [HttpPost("start")]
-        public async Task<ActionResult> StartMatch([FromBody] StartMatchRequest request)
-        {
-            if (request == null)
-            {
-                return BadRequest("Invalid match details.");
-            }
-
-            try
-            {
-                var match = await _matchService.StartMatch(request.StartingScore, request.NumberOfSets, request.NumberOfPlayers, request.PlayerNames);
-                return Ok(match);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message); 
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}"); 
-            }
-        }
-
     }
 }
 

@@ -3,8 +3,8 @@
     public class StartMatchRequest
     {
         public int StartingScore { get; set; }
-        public int NumberOfSets { get; set; }
-        public int NumberOfPlayers { get; set; }
-        public List<string> PlayerNames { get; set; }
+        public int BestOfLegs { get; set; }
+        public int BestOfSets { get; set; } 
+        public List<string> PlayerNames { get; set; } = new List<string>();
     }
 }

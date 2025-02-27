@@ -129,48 +129,6 @@ namespace DartsGame.Controllers
             }
         }
 
-
-        [HttpPost("changeTurn")]
-        public async Task<ActionResult> ChangeTurn([FromBody] ChangeTurnRequest request)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                // Get match with necessary navigation properties included
-                var match = await _matchRepository.GetById(request.MatchId);
-                if (match == null)
-                {
-                    return NotFound($"Match with ID {request.MatchId} not found.");
-                }
-
-                var turnThrows = new TurnThrowDTOstring
-                {
-                    Throw1 = request.Throw1,
-                    Throw2 = request.Throw2,
-                    Throw3 = request.Throw3
-                };
-
-                await _turnService.ChangeTurn(match, turnThrows);
-
-                return Ok();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
     }
 }
 
