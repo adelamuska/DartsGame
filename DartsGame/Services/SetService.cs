@@ -19,11 +19,6 @@ namespace DartsGame.Services
         public async Task<IEnumerable<SetDTO>> GetAll()
         {
             var sets = await _setRepository.GetAll();
-            if (sets == null)
-            {
-                throw new ArgumentNullException(nameof(sets));
-
-            }
             return _mapper.Map<IEnumerable<SetDTO>>(sets);
         }
 
@@ -41,7 +36,7 @@ namespace DartsGame.Services
         {
             if (setDTO == null)
             {
-                throw new ArgumentNullException(nameof(setDTO), ("Set cannot be null"));
+                throw new ArgumentNullException("Set cannot be null.");
             }
 
             var setEntity = _mapper.Map<Set>(setDTO);
@@ -57,39 +52,28 @@ namespace DartsGame.Services
 
         public async Task<SetDTO> UpdateSet(Guid setId, SetDTO setDTO)
         {
+            if (setDTO == null)
             {
-                if (setDTO == null)
-                {
-                    throw new ArgumentNullException(nameof(setDTO), "Set cannot be null.");
-                }
-
-                var setById = await _setRepository.GetById(setId);
-
-                if (setById == null)
-                {
-                    throw new KeyNotFoundException($"Set with ID {setById} not found.");
-                }
-
-                var setEntity = _mapper.Map(setDTO, setById);
-                setEntity.SetId = setId;
-
-                var updatedSet = await _setRepository.Update(setEntity);
-
-                if (updatedSet == null)
-                {
-                    throw new KeyNotFoundException($"Set with ID {setDTO.SetId} not found for update.");
-                }
-
-                return _mapper.Map<SetDTO>(updatedSet);
+                throw new ArgumentNullException("Set cannot be null.");
             }
 
+            var setById = await _setRepository.GetById(setId);
+            if (setById == null)
+            {
+                throw new KeyNotFoundException($"Set with ID {setId} not found.");
+            }
+
+            var setEntity = _mapper.Map(setDTO, setById);
+            setEntity.SetId = setId;
+
+            var updatedSet = await _setRepository.Update(setEntity);
+
+            return _mapper.Map<SetDTO>(updatedSet);
         }
 
         public async Task DeleteSet(Guid setId)
         {
-
             var set = await _setRepository.GetById(setId);
-
             if (set == null)
             {
                 throw new KeyNotFoundException($"Set with ID {setId} not found.");
@@ -97,6 +81,8 @@ namespace DartsGame.Services
 
             await _setRepository.Delete(setId);
         }
+
+
     }
 }
 

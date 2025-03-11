@@ -27,106 +27,59 @@ namespace DartsGame.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LegDTO>>> GetAllLegs()
         {
-            try
-            {
-                var legs = await _legService.GetAll();
-                return Ok(legs);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            var legs = await _legService.GetAll();
+            return Ok(legs);
+
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<LegDTO>> GetLegById(Guid id)
         {
-            try
+            var leg = await _legService.GetById(id);
+            if (leg == null)
             {
-                var leg = await _legService.GetById(id);
-                if (leg == null)
-                {
-                    return NotFound($"Leg with ID {id} not found.");
-                }
-                return Ok(leg);
+                return NotFound($"Leg with ID {id} not found.");
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            return Ok(leg);
+
         }
 
         [HttpPost]
-        public async Task<ActionResult<LegDTO>> CreateLeg([FromBody] LegDTO legDTO)
+        public async Task<ActionResult<LegDTO>> CreateLeg([FromBody] LegDTO? legDTO)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
 
-                var createdLeg = await _legService.AddLeg(legDTO);
-                return CreatedAtAction(nameof(GetLegById), new { id = createdLeg.LegId }, createdLeg);
-            }
-            catch (ArgumentNullException ex)
+            if (!ModelState.IsValid)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ModelState);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            var createdLeg = await _legService.AddLeg(legDTO);
+            return CreatedAtAction(nameof(GetLegById), new { id = createdLeg.LegId }, createdLeg);
+
         }
 
-        [HttpPost("{id}")]
-        public async Task<ActionResult<LegDTO>> UpdateLeg(Guid id, [FromBody] LegDTO legDTO)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<LegDTO>> UpdateLeg(Guid id, [FromBody] LegDTO? legDTO)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
+                return BadRequest(ModelState);
+            }
 
-                var updtatedLeg = await _legService.UpdateLeg(id, legDTO);
-                return Ok(updtatedLeg);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var updtatedLeg = await _legService.UpdateLeg(id, legDTO);
+            return Ok(updtatedLeg);
+
         }
 
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteLeg(Guid id)
         {
-            try
-            {
-                await _legService.DeleteLeg(id);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            await _legService.DeleteLeg(id);
+            return NoContent();
+
         }
 
         [HttpPost("startLeg/{matchId}")]
@@ -137,35 +90,21 @@ namespace DartsGame.Controllers
                 return BadRequest("Invalid match ID.");
             }
 
-            try
+
+            var match = await _matchRepository.GetById(matchId);
+
+
+            if (match == null)
             {
-               
-                var match = await _matchRepository.GetById(matchId);
-
-                
-                if (match == null)
-                {
-                    return NotFound("Match not found.");
-                }
-
-
-                var leg = await _legService.StartLeg(match);
-
-
-                return CreatedAtAction(nameof(GetLegById), new { id = leg.LegId }, leg);
+                return NotFound("Match not found.");
             }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+
+            var leg = await _legService.StartLeg(match);
+
+
+            return CreatedAtAction(nameof(GetLegById), new { id = leg.LegId }, leg);
+
         }
     }
 }

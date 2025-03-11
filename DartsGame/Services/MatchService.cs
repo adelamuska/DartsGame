@@ -24,12 +24,7 @@ namespace DartsGame.Services
         public async Task<IEnumerable<MatchDTO>> GetAll()
         {
             var matches = await _matchRepository.GetAll();
-            if (matches == null)
-            {
-                throw new ArgumentNullException(nameof(matches));
-
-            }
-            return _mapper.Map<IEnumerable<MatchDTO>>(matches);
+            return _mapper.Map<IEnumerable<MatchDTO>>(matches);  
         }
 
         public async Task<MatchDTO> GetById(Guid matchId)
@@ -46,10 +41,11 @@ namespace DartsGame.Services
         {
             if (matchDTO == null)
             {
-                throw new ArgumentNullException(nameof(matchDTO), ("Match cannot be null"));
+                throw new ArgumentNullException("Match cannot be null.");
             }
 
             var matchEntity = _mapper.Map<Match>(matchDTO);
+
             var addedMatch = await _matchRepository.Create(matchEntity);
 
             if (addedMatch == null)
@@ -62,39 +58,27 @@ namespace DartsGame.Services
 
         public async Task<MatchDTO> UpdateMatch(Guid matchId, MatchDTO matchDTO)
         {
+            if (matchDTO == null)
             {
-                if (matchDTO == null)
-                {
-                    throw new ArgumentNullException(nameof(matchDTO), "Match cannot be null.");
-                }
-
-                var matchById = await _matchRepository.GetById(matchId);
-
-                if (matchById == null)
-                {
-                    throw new KeyNotFoundException($"Match with ID {matchId} not found.");
-                }
-
-                var matchEntity = _mapper.Map(matchDTO, matchById);
-                matchEntity.MatchId = matchId;
-
-                var updatedMatch = await _matchRepository.Update(matchEntity);
-
-                if (updatedMatch == null)
-                {
-                    throw new KeyNotFoundException($"Match with ID {matchDTO.MatchId} not found for update.");
-                }
-
-                return _mapper.Map<MatchDTO>(updatedMatch);
+                throw new ArgumentNullException("Match cannot be null.");
             }
 
+            var matchById = await _matchRepository.GetById(matchId);
+            if (matchById == null)
+            {
+                throw new KeyNotFoundException($"Match with ID {matchId} not found.");
+            }
+
+            var matchEntity = _mapper.Map(matchDTO, matchById);
+
+            var updatedMatch = await _matchRepository.Update(matchEntity);
+
+            return _mapper.Map<MatchDTO>(updatedMatch);
         }
 
         public async Task DeleteMatch(Guid matchId)
         {
-
             var match = await _matchRepository.GetById(matchId);
-
             if (match == null)
             {
                 throw new KeyNotFoundException($"Match with ID {matchId} not found.");
@@ -111,19 +95,19 @@ namespace DartsGame.Services
             {
                 throw new ArgumentException($"Invalid starting score {score}");
             }
-            var startingScore = (StartingScore)score;
+            StartingScore startingScore = (StartingScore)score;
 
             if (!Enum.IsDefined(typeof(BestOfSets), sets))
             {
                 throw new ArgumentException($"Invalid number of sets {sets}");
             }
-            var numberOfSets = (BestOfSets)sets;
+            BestOfSets numberOfSets = (BestOfSets)sets;
 
-            if(!Enum.IsDefined(typeof(BestOfLegs), legs))
+            if (!Enum.IsDefined(typeof(BestOfLegs), legs))
             {
                 throw new ArgumentException($"Invalid number of sets {legs}");
             }
-            var numberOfLegs = (BestOfLegs)legs;
+            BestOfLegs numberOfLegs = (BestOfLegs)legs;
 
             if (numberOfPlayers > 6 || numberOfPlayers < 1)
             {
@@ -163,7 +147,7 @@ namespace DartsGame.Services
 
             var match = await AddMatch(matchDTO);
 
-            
+
             foreach (var playerId in matchPlayers.Keys)
             {
                 var playerMatch = new PlayerMatch()
@@ -177,12 +161,12 @@ namespace DartsGame.Services
 
             await _context.SaveChangesAsync();
 
-            
+
             var newSet = new Set(Guid.NewGuid())
             {
                 MatchId = matchId,
                 SetNumber = 1,
-                BestOfLegs = numberOfLegs, 
+                BestOfLegs = numberOfLegs,
                 IsFinished = false
             };
 
@@ -208,6 +192,15 @@ namespace DartsGame.Services
                 };
 
                 _context.LegScores.Add(legScore);
+
+                var setResult = new SetResult
+                {
+                    SetId = firstLeg.SetId,
+                    PlayerId = playerId,
+                    LegsWon = 0
+                };
+
+                _context.SetResults.Add(setResult);
             }
 
             var initialTurn = new Turn(

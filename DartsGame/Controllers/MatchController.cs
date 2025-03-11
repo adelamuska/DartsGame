@@ -20,105 +20,56 @@ namespace DartsGame.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MatchDTO>>> GetAllMatches()
         {
-            try
-            {
-                var matches = await _matchService.GetAll();
-                return Ok(matches);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var matches = await _matchService.GetAll();
+            return Ok(matches);
+
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<MatchDTO>> GetMatchById(Guid id)
         {
-            try
+            var match = await _matchService.GetById(id);
+            if (match == null)
             {
-                var match = await _matchService.GetById(id);
-                if (match == null)
-                {
-                    return NotFound($"Match with ID {id} not found.");
-                }
-                return Ok(match);
+                return NotFound($"Match with ID {id} not found.");
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            return Ok(match);
+
         }
 
         [HttpPost]
-        public async Task<ActionResult<MatchDTO>> CreateMatch([FromBody] MatchDTO matchDTO)
+        public async Task<ActionResult<MatchDTO>> CreateMatch([FromBody] MatchDTO? matchDTO)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
+                return BadRequest(ModelState);
+            }
 
-                var createdMatch = await _matchService.AddMatch(matchDTO);
-                return CreatedAtAction(nameof(GetMatchById), new { id = createdMatch.MatchId }, createdMatch);
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var createdMatch = await _matchService.AddMatch(matchDTO);
+            return CreatedAtAction(nameof(GetMatchById), new { id = createdMatch.MatchId }, createdMatch);
+
         }
 
-        [HttpPost("{id}")]
-        public async Task<ActionResult<MatchDTO>> UpdateMatch(Guid id, [FromBody] MatchDTO matchDTO)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<MatchDTO>> UpdateMatch(Guid id, [FromBody] MatchDTO? matchDTO)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
+                return BadRequest(ModelState);
+            }
 
-                var updatedMatch = await _matchService.UpdateMatch(id, matchDTO);
-                return Ok(updatedMatch);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var updatedMatch = await _matchService.UpdateMatch(id, matchDTO);
+            return Ok(updatedMatch);
+
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteMatch(Guid id)
         {
-            try
-            {
-                await _matchService.DeleteMatch(id);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            await _matchService.DeleteMatch(id);
+            return NoContent();
+
         }
 
     }

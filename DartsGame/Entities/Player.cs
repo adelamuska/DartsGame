@@ -10,6 +10,9 @@
 
 
         public ICollection<PlayerMatch> PlayerMatches { get; set; }
+        public ICollection<LegStats> LegStats { get; set; } = new List<LegStats>();
+        public ICollection<SetStats> SetStats { get; set; } = new List<SetStats>();
+        public ICollection<MatchStats> MatchStats { get; set; } = new List<MatchStats>();
 
 
         public Player(Guid playerId, string name)

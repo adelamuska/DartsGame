@@ -40,9 +40,6 @@ namespace DartsGame.Migrations
                     b.Property<Guid>("SetId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("StartingPlayerPlayerId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("WinnerId")
                         .HasColumnType("uniqueidentifier");
 
@@ -50,11 +47,9 @@ namespace DartsGame.Migrations
 
                     b.HasIndex("SetId");
 
-                    b.HasIndex("StartingPlayerPlayerId");
-
                     b.HasIndex("WinnerId");
 
-                    b.ToTable("Legs");
+                    b.ToTable("Legs", (string)null);
                 });
 
             modelBuilder.Entity("DartsGame.Entities.LegScore", b =>
@@ -72,7 +67,55 @@ namespace DartsGame.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("LegScores");
+                    b.ToTable("LegScores", (string)null);
+                });
+
+            modelBuilder.Entity("DartsGame.Entities.LegStats", b =>
+                {
+                    b.Property<Guid>("LegStatsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("CheckoutPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CheckoutPoints")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count100Plus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count140Plus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count180s")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count60Plus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DartsThrown")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("First9PPD")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("LegId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("PPD")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("LegStatsId");
+
+                    b.HasIndex("LegId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("LegStats", (string)null);
                 });
 
             modelBuilder.Entity("DartsGame.Entities.Match", b =>
@@ -104,7 +147,58 @@ namespace DartsGame.Migrations
 
                     b.HasKey("MatchId");
 
-                    b.ToTable("Matches");
+                    b.ToTable("Matches", (string)null);
+                });
+
+            modelBuilder.Entity("DartsGame.Entities.MatchStats", b =>
+                {
+                    b.Property<Guid>("MatchStatsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("BestCheckoutPoints")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CheckoutPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Count100Plus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count140Plus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count180s")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count60Plus")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("First9PPD")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("LegsWin")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MatchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("PPD")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SetsWin")
+                        .HasColumnType("int");
+
+                    b.HasKey("MatchStatsId");
+
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("MatchStats", (string)null);
                 });
 
             modelBuilder.Entity("DartsGame.Entities.Player", b =>
@@ -128,7 +222,7 @@ namespace DartsGame.Migrations
 
                     b.HasKey("PlayerId");
 
-                    b.ToTable("Players");
+                    b.ToTable("Players", (string)null);
                 });
 
             modelBuilder.Entity("DartsGame.Entities.PlayerMatch", b =>
@@ -143,7 +237,7 @@ namespace DartsGame.Migrations
 
                     b.HasIndex("MatchId");
 
-                    b.ToTable("PlayerMatches");
+                    b.ToTable("PlayerMatches", (string)null);
                 });
 
             modelBuilder.Entity("DartsGame.Entities.Set", b =>
@@ -174,7 +268,7 @@ namespace DartsGame.Migrations
 
                     b.HasIndex("MatchId");
 
-                    b.ToTable("Sets");
+                    b.ToTable("Sets", (string)null);
                 });
 
             modelBuilder.Entity("DartsGame.Entities.SetResult", b =>
@@ -192,7 +286,55 @@ namespace DartsGame.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("SetResults");
+                    b.ToTable("SetResults", (string)null);
+                });
+
+            modelBuilder.Entity("DartsGame.Entities.SetStats", b =>
+                {
+                    b.Property<Guid>("SetStatsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("BestCheckoutPoints")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CheckoutPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Count100Plus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count140Plus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count180s")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count60Plus")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("First9PPD")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("LegsWin")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PPD")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SetId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("SetStatsId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("SetId");
+
+                    b.ToTable("SetStats", (string)null);
                 });
 
             modelBuilder.Entity("DartsGame.Entities.Turn", b =>
@@ -228,7 +370,7 @@ namespace DartsGame.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("Turns");
+                    b.ToTable("Turns", (string)null);
                 });
 
             modelBuilder.Entity("DartsGame.Entities.TurnThrow", b =>
@@ -243,13 +385,13 @@ namespace DartsGame.Migrations
                     b.Property<int>("Score")
                         .HasColumnType("int");
 
-                    b.Property<int>("Throw1")
+                    b.Property<int?>("Throw1")
                         .HasColumnType("int");
 
-                    b.Property<int>("Throw2")
+                    b.Property<int?>("Throw2")
                         .HasColumnType("int");
 
-                    b.Property<int>("Throw3")
+                    b.Property<int?>("Throw3")
                         .HasColumnType("int");
 
                     b.Property<Guid>("TurnId")
@@ -259,7 +401,7 @@ namespace DartsGame.Migrations
 
                     b.HasIndex("TurnId");
 
-                    b.ToTable("TurnThrows");
+                    b.ToTable("TurnThrows", (string)null);
                 });
 
             modelBuilder.Entity("DartsGame.Entities.Leg", b =>
@@ -270,20 +412,12 @@ namespace DartsGame.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DartsGame.Entities.Player", "StartingPlayer")
-                        .WithMany()
-                        .HasForeignKey("StartingPlayerPlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DartsGame.Entities.Player", "Winner")
                         .WithMany()
                         .HasForeignKey("WinnerId")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Set");
-
-                    b.Navigation("StartingPlayer");
 
                     b.Navigation("Winner");
                 });
@@ -303,6 +437,44 @@ namespace DartsGame.Migrations
                         .IsRequired();
 
                     b.Navigation("Leg");
+
+                    b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("DartsGame.Entities.LegStats", b =>
+                {
+                    b.HasOne("DartsGame.Entities.Leg", "Leg")
+                        .WithMany("LegStats")
+                        .HasForeignKey("LegId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DartsGame.Entities.Player", "Player")
+                        .WithMany("LegStats")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Leg");
+
+                    b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("DartsGame.Entities.MatchStats", b =>
+                {
+                    b.HasOne("DartsGame.Entities.Match", "Match")
+                        .WithMany("MatchStats")
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DartsGame.Entities.Player", "Player")
+                        .WithMany("MatchStats")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Match");
 
                     b.Navigation("Player");
                 });
@@ -356,6 +528,25 @@ namespace DartsGame.Migrations
                     b.Navigation("Set");
                 });
 
+            modelBuilder.Entity("DartsGame.Entities.SetStats", b =>
+                {
+                    b.HasOne("DartsGame.Entities.Player", "Player")
+                        .WithMany("SetStats")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DartsGame.Entities.Set", "Set")
+                        .WithMany("SetStats")
+                        .HasForeignKey("SetId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Set");
+                });
+
             modelBuilder.Entity("DartsGame.Entities.Turn", b =>
                 {
                     b.HasOne("DartsGame.Entities.Leg", "Leg")
@@ -390,11 +581,15 @@ namespace DartsGame.Migrations
                 {
                     b.Navigation("LegScores");
 
+                    b.Navigation("LegStats");
+
                     b.Navigation("Turns");
                 });
 
             modelBuilder.Entity("DartsGame.Entities.Match", b =>
                 {
+                    b.Navigation("MatchStats");
+
                     b.Navigation("PlayerMatches");
 
                     b.Navigation("Sets");
@@ -402,7 +597,13 @@ namespace DartsGame.Migrations
 
             modelBuilder.Entity("DartsGame.Entities.Player", b =>
                 {
+                    b.Navigation("LegStats");
+
+                    b.Navigation("MatchStats");
+
                     b.Navigation("PlayerMatches");
+
+                    b.Navigation("SetStats");
                 });
 
             modelBuilder.Entity("DartsGame.Entities.Set", b =>
@@ -410,6 +611,8 @@ namespace DartsGame.Migrations
                     b.Navigation("Legs");
 
                     b.Navigation("SetResults");
+
+                    b.Navigation("SetStats");
                 });
 
             modelBuilder.Entity("DartsGame.Entities.Turn", b =>

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Repositories
 {
-    public abstract class BaseRepository<T> :IBaseRepository<T> where T : class
+    public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     {
         protected readonly AppDbContext _context;
         protected readonly DbSet<T> _dbSet;
@@ -17,6 +17,8 @@ namespace DartsGame.Repositories
 
         public virtual async Task<T> Create(T entity)
         {
+
+
             await _dbSet.AddAsync(entity);
             await _context.SaveChangesAsync();
             return entity;
@@ -46,11 +48,11 @@ namespace DartsGame.Repositories
             var entity = await _dbSet.FindAsync(Id);
             if (entity != null)
             {
-                if(entity is ISoftDeletable softDeletable)
+                if (entity is ISoftDeletable softDeletable)
                 {
                     softDeletable.IsDeleted = true;
-               
-                await _context.SaveChangesAsync();
+
+                    await _context.SaveChangesAsync();
                 }
             }
         }

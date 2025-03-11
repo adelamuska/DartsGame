@@ -1,6 +1,6 @@
 ﻿namespace DartsGame.Enums
 {
-    public enum  StartingScore
+    public enum StartingScore
     {
         Score701 = 701,
         Score501 = 501,

@@ -23,29 +23,24 @@ namespace DartsGame.Services
         public async Task<IEnumerable<LegDTO>> GetAll()
         {
             var legs = await _legRepository.GetAll();
-            if (legs == null)
-            {
-                throw new ArgumentNullException(nameof(legs));
-
-            }
-            return _mapper.Map<IEnumerable<LegDTO>>(legs);
+            return _mapper.Map<IEnumerable<LegDTO>>(legs);  
         }
 
         public async Task<LegDTO> GetById(Guid legId)
         {
-            var legs = await _legRepository.GetById(legId);
-            if (legId == null)
+            var leg = await _legRepository.GetById(legId);
+            if (leg == null)
             {
                 throw new KeyNotFoundException($"Leg with ID {legId} not found.");
             }
-            return _mapper.Map<LegDTO>(legs);
+            return _mapper.Map<LegDTO>(leg);
         }
 
         public async Task<LegDTO> AddLeg(LegDTO legDTO)
         {
             if (legDTO == null)
             {
-                throw new ArgumentNullException(nameof(legDTO), ("Leg cannot be null"));
+                throw new ArgumentNullException("Leg cannot be null.");
             }
 
             var legEntity = _mapper.Map<Leg>(legDTO);
@@ -61,39 +56,28 @@ namespace DartsGame.Services
 
         public async Task<LegDTO> UpdateLeg(Guid legId, LegDTO legDTO)
         {
+            if (legDTO == null)
             {
-                if (legDTO == null)
-                {
-                    throw new ArgumentNullException(nameof(legDTO), "Leg cannot be null.");
-                }
-
-                var legById = await _legRepository.GetById(legId);
-
-                if (legById == null)
-                {
-                    throw new KeyNotFoundException($"Leg with ID {legId} not found.");
-                }
-
-                var legEntity = _mapper.Map(legDTO, legById);
-                legEntity.LegId = legId;
-
-                var updatedLeg = await _legRepository.Update(legEntity);
-
-                if (updatedLeg == null)
-                {
-                    throw new KeyNotFoundException($"Leg with ID {legDTO.LegId} not found for update.");
-                }
-
-                return _mapper.Map<LegDTO>(updatedLeg);
+                throw new ArgumentNullException("Leg cannot be null.");
             }
 
+            var legById = await _legRepository.GetById(legId);
+            if (legById == null)
+            {
+                throw new KeyNotFoundException($"Leg with ID {legId} not found.");
+            }
+
+            var legEntity = _mapper.Map(legDTO, legById);
+            legEntity.LegId = legId;
+
+            var updatedLeg = await _legRepository.Update(legEntity);
+
+            return _mapper.Map<LegDTO>(updatedLeg);
         }
 
         public async Task DeleteLeg(Guid legId)
         {
-
-            var leg = await  _legRepository.GetById(legId);
-
+            var leg = await _legRepository.GetById(legId);
             if (leg == null)
             {
                 throw new KeyNotFoundException($"Leg with ID {legId} not found.");
@@ -101,6 +85,7 @@ namespace DartsGame.Services
 
             await _legRepository.Delete(legId);
         }
+
 
 
         public async Task<Leg> StartLeg(Match match)
@@ -125,7 +110,7 @@ namespace DartsGame.Services
                 throw new InvalidOperationException("No sets found for the match.");
             }
 
-            var legNumbers = await _context.Legs.Where(s => s.SetId == lastSet.SetId).Select(l => l.LegNumber).ToListAsync();  
+            var legNumbers = await _context.Legs.Where(s => s.SetId == lastSet.SetId).Select(l => l.LegNumber).ToListAsync();
 
             var currentLegNumber = legNumbers.DefaultIfEmpty(0).Max();
 
