@@ -19,105 +19,59 @@ namespace DartsGame.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TurnThrowDTO>>> GetAllTurnThrows()
         {
-            try
-            {
-                var turnThrows = await _turnThrowService.GetAll();
-                return Ok(turnThrows);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            var turnThrows = await _turnThrowService.GetAll();
+            return Ok(turnThrows);
         }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TurnThrowDTO>> GetTurnThrowById(Guid id)
         {
-            try
+
+            var turnThrow = await _turnThrowService.GetById(id);
+            if (turnThrow == null)
             {
-                var turnThrow = await _turnThrowService.GetById(id);
-                if (turnThrow == null)
-                {
-                    return NotFound($"Turn throw with ID {id} not found.");
-                }
-                return Ok(turnThrow);
+                return NotFound($"Turn throw with ID {id} not found.");
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            return Ok(turnThrow);
         }
 
         [HttpPost]
-        public async Task<ActionResult<TurnThrowDTO>> CreateTurnThrow([FromBody] TurnThrowDTO turnThrowDTO)
+        public async Task<ActionResult<TurnThrowDTO>> CreateTurnThrow([FromBody] TurnThrowDTO? turnThrowDTO)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
 
-                var createdTurnThrow = await _turnThrowService.AddTurnThrow(turnThrowDTO);
-                return CreatedAtAction(nameof(GetTurnThrowById), new { id = createdTurnThrow.TurnThrowId }, createdTurnThrow);
-            }
-            catch (ArgumentNullException ex)
+            if (!ModelState.IsValid)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ModelState);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            var createdTurnThrow = await _turnThrowService.AddTurnThrow(turnThrowDTO);
+            return CreatedAtAction(nameof(GetTurnThrowById), new { id = createdTurnThrow.TurnThrowId }, createdTurnThrow);
+
         }
 
-        [HttpPost("{id}")]
-        public async Task<ActionResult<TurnThrowDTO>> UpdateTurnThrow(Guid id, [FromBody] TurnThrowDTO turnThrowDTO)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<TurnThrowDTO>> UpdateTurnThrow(Guid id, [FromBody] TurnThrowDTO? turnThrowDTO)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
 
-                var updatedTurnThrow = await _turnThrowService.UpdateTurnThrow(id, turnThrowDTO);
-                return Ok(updatedTurnThrow);
-            }
-            catch (KeyNotFoundException ex)
+            if (!ModelState.IsValid)
             {
-                return NotFound(ex.Message);
+                return BadRequest(ModelState);
             }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            var updatedTurnThrow = await _turnThrowService.UpdateTurnThrow(id, turnThrowDTO);
+            return Ok(updatedTurnThrow);
         }
+
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteTurnThrow(Guid id)
         {
-            try
-            {
-                await _turnThrowService.DeleteTurnThrow(id);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            await _turnThrowService.DeleteTurnThrow(id);
+            return NoContent();
+
         }
     }
 }

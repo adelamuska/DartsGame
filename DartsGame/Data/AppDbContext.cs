@@ -20,6 +20,10 @@ namespace DartsGame.Data
         public DbSet<Turn> Turns { get; set; }
 
         public DbSet<TurnThrow> TurnThrows { get; set; }
+        public DbSet<LegStats> LegStats { get; set; }
+        public DbSet<SetStats> SetStats { get; set; }
+        public DbSet<MatchStats> MatchStats { get; set; }
+
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -68,7 +72,7 @@ namespace DartsGame.Data
                 .WithMany()
                 .HasForeignKey(l => l.WinnerId)
                 .IsRequired(false)
-                .OnDelete(DeleteBehavior.NoAction); 
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Leg>()
                 .HasMany(l => l.LegScores)
@@ -96,12 +100,51 @@ namespace DartsGame.Data
                 .HasForeignKey(t => t.PlayerId);
 
             modelBuilder.Entity<TurnThrow>()
-            .HasKey(tt => tt.TurnThrowId);  
+            .HasKey(tt => tt.TurnThrowId);
 
             modelBuilder.Entity<TurnThrow>()
                 .HasOne(tt => tt.Turn)
-                .WithMany(t => t.TurnThrows)  
+                .WithMany(t => t.TurnThrows)
                 .HasForeignKey(tt => tt.TurnId);
+
+            // Configure LegStats relationships
+            modelBuilder.Entity<LegStats>()
+                .HasOne(ls => ls.Leg)
+                .WithMany(l => l.LegStats)
+                .HasForeignKey(ls => ls.LegId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<LegStats>()
+                .HasOne(ls => ls.Player)
+                .WithMany(p => p.LegStats)
+                .HasForeignKey(ls => ls.PlayerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure MatchStats relationships
+            modelBuilder.Entity<MatchStats>()
+                .HasOne(ms => ms.Match)
+                .WithMany(m => m.MatchStats)
+                .HasForeignKey(ms => ms.MatchId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MatchStats>()
+                .HasOne(ms => ms.Player)
+                .WithMany(p => p.MatchStats)
+                .HasForeignKey(ms => ms.PlayerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure SetStats relationships
+            modelBuilder.Entity<SetStats>()
+                .HasOne(ss => ss.Set)
+                .WithMany(s => s.SetStats)
+                .HasForeignKey(ss => ss.SetId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<SetStats>()
+                .HasOne(ss => ss.Player)
+                .WithMany(p => p.SetStats)
+                .HasForeignKey(ss => ss.PlayerId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
     }

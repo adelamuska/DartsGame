@@ -1,4 +1,5 @@
-﻿using DartsGame.Entities;
+﻿using System.Text.Json.Serialization;
+using DartsGame.Entities;
 using DartsGame.Enums;
 
 namespace DartsGame.DTO
@@ -12,7 +13,7 @@ namespace DartsGame.DTO
         public StartingScore StartingScore { get; set; }
         public Guid? WinnerPlayerId { get; set; }
         public bool IsFinished { get; set; }
-        public ICollection<Set> Sets { get; set; }
+       // public ICollection<Set> Sets { get; set; }
 
         public MatchDTO(Guid matchId, DateTime startTime, DateTime? endTime, BestOfSets bestOfSets, StartingScore startingScore, bool isFinished)
         {

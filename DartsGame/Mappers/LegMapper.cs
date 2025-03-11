@@ -6,7 +6,8 @@ namespace DartsGame.Mapper
 {
     public class LegMapper : Profile
     {
-        public LegMapper() { 
+        public LegMapper()
+        {
 
             CreateMap<Leg, LegDTO>();
             CreateMap<LegDTO, Leg>();

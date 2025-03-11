@@ -20,11 +20,6 @@ namespace DartsGame.Services
         public async Task<IEnumerable<TurnThrowDTO>> GetAll()
         {
             var turnsThrow = await _turnThrowRepository.GetAll();
-            if (turnsThrow == null)
-            {
-                throw new ArgumentNullException(nameof(turnsThrow));
-
-            }
             return _mapper.Map<IEnumerable<TurnThrowDTO>>(turnsThrow);
         }
 
@@ -42,7 +37,7 @@ namespace DartsGame.Services
         {
             if (turnThrowDTO == null)
             {
-                throw new ArgumentNullException(nameof(turnThrowDTO), ("Turn throw cannot be null"));
+                throw new ArgumentNullException("Turn throw cannot be null.");
             }
 
             var turnThrowEntity = _mapper.Map<TurnThrow>(turnThrowDTO);
@@ -58,39 +53,28 @@ namespace DartsGame.Services
 
         public async Task<TurnThrowDTO> UpdateTurnThrow(Guid turnThrowId, TurnThrowDTO turnThrowDTO)
         {
+            if (turnThrowDTO == null)
             {
-                if (turnThrowDTO == null)
-                {
-                    throw new ArgumentNullException(nameof(turnThrowDTO), "Turn throw cannot be null.");
-                }
-
-                var turnThrowById = await _turnThrowRepository.GetById(turnThrowId);
-
-                if (turnThrowById == null)
-                {
-                    throw new KeyNotFoundException($"Turn throw with ID {turnThrowId} not found.");
-                }
-
-                var turnThrowEntity = _mapper.Map(turnThrowDTO, turnThrowById);
-                turnThrowEntity.TurnThrowId = turnThrowId;
-
-                var updatedTurnThrow = await _turnThrowRepository.Update(turnThrowEntity);
-
-                if (updatedTurnThrow == null)
-                {
-                    throw new KeyNotFoundException($"Turn throw with ID {turnThrowDTO.TurnThrowId} not found for update.");
-                }
-
-                return _mapper.Map<TurnThrowDTO>(updatedTurnThrow);
+                throw new ArgumentNullException(nameof(turnThrowDTO), "Turn throw cannot be null.");
             }
 
+            var turnThrowById = await _turnThrowRepository.GetById(turnThrowId);
+            if (turnThrowById == null)
+            {
+                throw new KeyNotFoundException($"Turn throw with ID {turnThrowId} not found.");
+            }
+
+            var turnThrowEntity = _mapper.Map(turnThrowDTO, turnThrowById);
+            turnThrowEntity.TurnThrowId = turnThrowId;
+
+            var updatedTurnThrow = await _turnThrowRepository.Update(turnThrowEntity);
+
+            return _mapper.Map<TurnThrowDTO>(updatedTurnThrow);
         }
 
         public async Task DeleteTurnThrow(Guid turnThrowId)
         {
-
             var turnThrow = await _turnThrowRepository.GetById(turnThrowId);
-
             if (turnThrow == null)
             {
                 throw new KeyNotFoundException($"Turn throw with ID {turnThrowId} not found.");
@@ -98,5 +82,6 @@ namespace DartsGame.Services
 
             await _turnThrowRepository.Delete(turnThrowId);
         }
+
     }
 }

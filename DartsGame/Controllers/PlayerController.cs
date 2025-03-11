@@ -19,105 +19,59 @@ namespace DartsGame.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PlayerDTO>>> GetAllPlayers()
         {
-            try
-            {
-                var players = await _playerService.GetAll();
-                return Ok(players);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var players = await _playerService.GetAll();
+            return Ok(players);
+
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PlayerDTO>> GetPlayerById(Guid id)
         {
-            try
+
+            var player = await _playerService.GetById(id);
+            if (player == null)
             {
-                var player = await _playerService.GetById(id);
-                if (player == null)
-                {
-                    return NotFound($"Player with ID {id} not found.");
-                }
-                return Ok(player);
+                return NotFound($"Player with ID {id} not found.");
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            return Ok(player);
+
         }
 
         [HttpPost]
-        public async Task<ActionResult<PlayerDTO>> CreatePlayer([FromBody] PlayerDTO playerDTO)
+        public async Task<ActionResult<PlayerDTO>> CreatePlayer([FromBody] PlayerDTO? playerDTO)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
 
-                var createdPlayer = await _playerService.AddPlayer(playerDTO);
-                return CreatedAtAction(nameof(GetPlayerById), new { id = createdPlayer.PlayerId }, createdPlayer);
-            }
-            catch (ArgumentNullException ex)
+            if (!ModelState.IsValid)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ModelState);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            var createdPlayer = await _playerService.AddPlayer(playerDTO);
+            return CreatedAtAction(nameof(GetPlayerById), new { id = createdPlayer.PlayerId }, createdPlayer);
+
         }
 
-        [HttpPost("{id}")]
-        public async Task<ActionResult<PlayerDTO>> UpdatePlayer(Guid id, [FromBody] PlayerDTO playerDTO)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<PlayerDTO>> UpdatePlayer(Guid id, [FromBody] PlayerDTO? playerDTO)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
 
-                var updatedPlayer = await _playerService.UpdatePlayer(id, playerDTO);
-                return Ok(updatedPlayer);
-            }
-            catch (KeyNotFoundException ex)
+            if (!ModelState.IsValid)
             {
-                return NotFound(ex.Message);
+                return BadRequest(ModelState);
             }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            var updatedPlayer = await _playerService.UpdatePlayer(id, playerDTO);
+            return Ok(updatedPlayer);
+
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeletePlayer(Guid id)
         {
-            try
-            {
-                await _playerService.DeletePlayer(id);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            await _playerService.DeletePlayer(id);
+            return NoContent();
+
         }
 
     }

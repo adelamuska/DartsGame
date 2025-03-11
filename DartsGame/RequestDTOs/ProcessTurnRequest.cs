@@ -1,6 +1,4 @@
-﻿using DartsGame.DTO;
-
-namespace DartsGame.RequestDTOs
+﻿namespace DartsGame.RequestDTOs
 {
     public class ProcessTurnRequest
     {

@@ -8,19 +8,20 @@ namespace DartsGame.Entities
         public Guid MatchId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        public BestOfSets BestOfSets {  get; set; }
+        public BestOfSets BestOfSets { get; set; }
         public StartingScore StartingScore { get; set; }
         public Guid? WinnerPlayerId { get; set; }
         public bool IsFinished { get; set; }
         public bool IsDeleted { get; set; }
 
-       
+
         public ICollection<PlayerMatch> PlayerMatches { get; set; }
-        public ICollection<Set> Sets { get; set; }
+        public ICollection<Set> Sets { get; set; } = new List<Set>();
+        public ICollection<MatchStats> MatchStats { get; set; } = new List<MatchStats>();
 
         public Match()
         {
-       
+
         }
 
         public Match(Guid matchId, DateTime startTime, DateTime? endTime, BestOfSets bestOfSets, StartingScore startingScore, bool isFinished)
@@ -31,7 +32,7 @@ namespace DartsGame.Entities
             BestOfSets = bestOfSets;
             StartingScore = startingScore;
             IsFinished = isFinished;
-           
+
         }
     }
 }
