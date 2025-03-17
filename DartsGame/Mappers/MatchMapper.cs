@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DartsGame.DTO;
+using DartsGame.DTOs;
 using DartsGame.Entities;
 
 namespace DartsGame.Mapper
@@ -11,6 +12,9 @@ namespace DartsGame.Mapper
 
             CreateMap<Match, MatchDTO>();
             CreateMap<MatchDTO, Match>();
+            CreateMap<Match, MatchWithStatsDTO>()
+             .ForMember(dest => dest.Players, opt => opt.Ignore());
+
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using DartsGame.Entities;
 
-namespace DartsGame.Interfaces
+namespace DartsGame.Interfaces.ServiceInterfaces
 {
-    public interface IGameService
+    public interface IGameFlowService
     {
 
         Task ProcessGameStateAfterTurn(Guid legId, int turnScore, string lastThrow);

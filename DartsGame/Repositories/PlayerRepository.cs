@@ -1,10 +1,11 @@
 ﻿using DartsGame.Data;
 using DartsGame.Entities;
+using DartsGame.Interfaces.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Repositories
 {
-    public class PlayerRepository : BaseRepository<Player>
+    public class PlayerRepository : BaseRepository<Player>, IPlayerRepository
     {
         public PlayerRepository(AppDbContext context) : base(context) { }
 
@@ -14,25 +15,7 @@ namespace DartsGame.Repositories
         }
 
 
-        //public async Task UpdatePlayersStats(Guid winnerId, List<Guid> loserIds)
-        //{
-        //    var winner = await _context.Players.FindAsync(winnerId);
-        //    if (winner != null)
-        //    {
-        //        winner.GamesWon++;
-        //    }
-
-        //    foreach (var loserId in loserIds)
-        //    {
-        //        var loser = await _context.Players.FindAsync(loserId);
-        //        if (loser != null)
-        //        {
-        //            loser.GamesLost++;
-        //        }
-        //    }
-
-        //    await _context.SaveChangesAsync();
-        //}
+      
 
         public async Task<List<Guid>> GetActivePlayerIds(Guid matchId)
         {

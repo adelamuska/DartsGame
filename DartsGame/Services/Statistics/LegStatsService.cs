@@ -1,11 +1,12 @@
 ﻿using DartsGame.Repositories.Statistics;
-using DartsGame.Interfaces;
 using System.Linq;
 using DartsGame.Entities;
+using DartsGame.Interfaces.ServiceInterfaces;
+using DartsGame.Interfaces.ServiceInterfaces.Statistics;
 
 namespace DartsGame.Services.Statistics
 {
-    public class LegStatsService : IStatsService
+    public class LegStatsService : ILegStatsService
     {
         private readonly LegStatsRepository _statsRepository;
 

@@ -24,7 +24,6 @@ namespace DartsGame.Controllers.Statistics
 
             var statistics =  new
                 
-                //_gameService.SaveLegStatistics(legId, playerId);
             {
                 PPD = await _legStats.CalculatePPD(legId, playerId),
                 First9PPD = await _legStats.CalculateFirst9PPD(legId, playerId),

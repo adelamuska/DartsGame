@@ -1,10 +1,11 @@
 ﻿using DartsGame.Data;
 using DartsGame.Entities;
+using DartsGame.Interfaces.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Repositories
 {
-    public class SetRepository : BaseRepository<Set>
+    public class SetRepository : BaseRepository<Set>, ISetRepository
     {
         public SetRepository(AppDbContext context) : base(context) { }
 
@@ -20,21 +21,21 @@ namespace DartsGame.Repositories
                 .FirstOrDefaultAsync(s => s.SetId == setId);
         }
 
-        public async Task<List<SetResult>> GetSetResults(Guid setId)
-        {
-            return await _context.SetResults
-                .Where(s => s.SetId == setId)
-                .ToListAsync();
-        }
+        //public async Task<List<SetResult>> GetSetResults(Guid setId)
+        //{
+        //    return await _context.SetResults
+        //        .Where(s => s.SetId == setId)
+        //        .ToListAsync();
+        //}
 
-        public async Task<bool> HasAnyPlayerWonSet(Guid setId, int legsNeededToWin)
-        {
-            var setResults = await _context.SetResults
-                .Where(s => s.SetId == setId)
-                .ToListAsync();
+        //public async Task<bool> HasAnyPlayerWonSet(Guid setId, int legsNeededToWin)
+        //{
+        //    var setResults = await _context.SetResults
+        //        .Where(s => s.SetId == setId)
+        //        .ToListAsync();
 
-            return setResults.Any(s => s.LegsWon >= legsNeededToWin);
-        }
+        //    return setResults.Any(s => s.LegsWon >= legsNeededToWin);
+        //}
 
         public async Task<int> GetLastSetNumber(Guid matchId)
         {

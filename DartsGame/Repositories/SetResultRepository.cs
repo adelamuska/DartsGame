@@ -1,10 +1,11 @@
 ﻿using DartsGame.Data;
 using DartsGame.Entities;
+using DartsGame.Interfaces.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Repositories
 {
-    public class SetResultRepository : BaseRepository<SetResult>
+    public class SetResultRepository : BaseRepository<SetResult>, ISetResultRepository
     {
         public SetResultRepository(AppDbContext context) : base(context) { }
 
@@ -21,16 +22,6 @@ namespace DartsGame.Repositories
                 .FirstOrDefaultAsync(s => s.SetId == setId && s.PlayerId == playerId);
         }
 
-        //public async Task IncrementPlayerLegsWon(Guid setId, Guid playerId)
-        //{
-        //    var setResult = await _context.SetResults
-        //        .FirstOrDefaultAsync(s => s.SetId == setId && s.PlayerId == playerId);
-
-        //    if (setResult != null)
-        //    {
-        //        setResult.LegsWon++;
-        //        await _context.SaveChangesAsync();
-        //    }
-        //}
+     
     }
 }

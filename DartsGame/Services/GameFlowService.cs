@@ -1,38 +1,26 @@
 ﻿using DartsGame.Data;
 using DartsGame.Entities;
 using DartsGame.Helpers;
-using DartsGame.Interfaces;
-using DartsGame.Repositories;
+using DartsGame.Interfaces.RepositoryInterfaces;
+using DartsGame.Interfaces.ServiceInterfaces;
 using DartsGame.Services.Statistics;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Services
 {
-    public class GameFlowService : IGameService
+    public class GameFlowService : IGameFlowService
     {
         private readonly AppDbContext _context;
-        private readonly LegRepository _legRepository;
-        private readonly TurnRepository _turnRepository;
-        private readonly LegScoreRepository _legScoreRepository;
-        private readonly TurnThrowRepository _turnThrowRepository;
-        private readonly SetRepository _setRepository;
-        private readonly SetResultRepository _setResultRepository;
-        private readonly MatchRepository _matchRepository;
+        private readonly IGameRepositoryService _repository;
         private readonly StatisticsService _statisticService;
 
 
 
-        public GameFlowService(AppDbContext context, LegRepository legRepository, TurnRepository turnRepository, LegScoreRepository legScoreRepository, TurnThrowRepository turnThrowRepository
-                        , SetRepository setRepository, SetResultRepository setResultRepository, MatchRepository matchRepository, PlayerRepository playerRepository, StatisticsService statisticsService)
+        public GameFlowService(AppDbContext context, IGameRepositoryService repository, StatisticsService statisticsService)
         {
+
             _context = context;
-            _legRepository = legRepository;
-            _turnRepository = turnRepository;
-            _legScoreRepository = legScoreRepository;
-            _turnThrowRepository = turnThrowRepository;
-            _setRepository = setRepository;
-            _setResultRepository = setResultRepository;
-            _matchRepository = matchRepository;
+            _repository = repository;
             _statisticService = statisticsService;
 
 
@@ -40,7 +28,7 @@ namespace DartsGame.Services
 
         public async Task ProcessGameStateAfterTurn(Guid legId, int turnScore, string lastThrow)
         {
-            var currentLeg = await _legRepository.GetLegById(legId);
+            var currentLeg = await _repository.LegRepository.GetLegById(legId);
             if (currentLeg == null)
             {
                 throw new InvalidOperationException("Leg not found.");
@@ -52,15 +40,15 @@ namespace DartsGame.Services
 
             if (currentLeg.IsFinished)
             {
-                var set = await _setRepository.GetSetById(currentLeg.SetId);
+                var set = await _repository.SetRepository.GetSetById(currentLeg.SetId);
                 await CheckSetCompletion(set.SetId);
             }
         }
 
         public async Task ValidateLegCompletion(Leg currentLeg, int turnScore, string lastThrow)
         {
-            var playerScores = await _legScoreRepository.GetLegScoresByLegId(currentLeg.LegId);
-            var currentTurn = await _turnRepository.GetLatestTurnByLegId(currentLeg.LegId);
+            var legScores = await _repository.LegScoreRepository.GetLegScoresByLegId(currentLeg.LegId);
+            var currentTurn = await _repository.TurnRepository.GetLatestTurnByLegId(currentLeg.LegId);
 
             if (currentTurn == null)
             {
@@ -68,14 +56,14 @@ namespace DartsGame.Services
             }
 
             var currentPlayerId = currentTurn.PlayerId;
-            var currentPlayerScore = playerScores.FirstOrDefault(p => p.PlayerId == currentPlayerId);
+            var currentPlayerScore = legScores.FirstOrDefault(p => p.PlayerId == currentPlayerId);
 
             if (currentPlayerScore == null)
             {
                 throw new InvalidOperationException("Player score not found.");
             }
 
-            var lastTurnThrow = await _turnThrowRepository.GetTurnThrowsByTurnId(currentTurn.TurnId);
+            var lastTurnThrow = await _repository.TurnThrowRepository.GetTurnThrowsByTurnId(currentTurn.TurnId);
 
             int remainingScore = currentPlayerScore.RemainingScore - turnScore;
 
@@ -147,7 +135,7 @@ namespace DartsGame.Services
 
         public async Task UpdatePlayerRemainingScore(Guid legId, Guid playerId, int remainingScore)
         {
-            var playerScore = await _legScoreRepository.GetPlayerLegScore(legId, playerId);
+            var playerScore = await _repository.LegScoreRepository.GetPlayerLegScore(legId, playerId);
 
             if (playerScore != null)
             {
@@ -158,17 +146,14 @@ namespace DartsGame.Services
 
         public async Task ClearRemainingThrows(Guid turnId)
         {
-            var turnThrows = await _context.TurnThrows
-                .Where(t => t.TurnId == turnId)
-                .OrderBy(t => t.TurnThrowId)
-                .ToListAsync();
+            var turnThrows = await _repository.TurnThrowRepository.GetTurnThrowsByTurnId(turnId);
 
             if (turnThrows.Count == 1 && turnThrows[0].Throw1.HasValue && !turnThrows[0].Throw2.HasValue && !turnThrows[0].Throw3.HasValue)
             {
                 turnThrows[0].Throw2 = null;
                 turnThrows[0].Throw3 = null;
             }
-            else if (turnThrows.Count == 2 && turnThrows[1].Throw2.HasValue && turnThrows[1].Throw2.HasValue && !turnThrows[1].Throw3.HasValue)
+            else if (turnThrows.Count == 2 && turnThrows[1].Throw1.HasValue && turnThrows[1].Throw2.HasValue && !turnThrows[1].Throw3.HasValue)
             {
                 turnThrows[1].Throw3 = null;
             }
@@ -184,14 +169,14 @@ namespace DartsGame.Services
 
             await IncrementPlayerLegsWon(leg.SetId, winnerId);
 
-            var legScores = await _legScoreRepository.GetLegScoresByLegId(leg.LegId);
+            var legScores = await _repository.LegScoreRepository.GetLegScoresByLegId(leg.LegId);
 
             foreach (var legScore in legScores)
             {
                 await _statisticService.SaveLegStatistics(leg.LegId, legScore.PlayerId);
             }
 
-            var set = await _setRepository.GetSetById(leg.SetId);
+            var set = await _repository.SetRepository.GetSetById(leg.SetId);
             if (set != null)
             {
                 await CheckSetCompletion(set.SetId);
@@ -200,7 +185,7 @@ namespace DartsGame.Services
 
         public async Task IncrementPlayerLegsWon(Guid setId, Guid playerId)
         {
-            var setResult = await _setResultRepository.GetPlayerSetResult(setId, playerId);
+            var setResult = await _repository.SetResultRepository.GetPlayerSetResult(setId, playerId);
 
             if (setResult != null)
             {
@@ -211,14 +196,14 @@ namespace DartsGame.Services
 
         private async Task CheckSetCompletion(Guid setId)
         {
-            var set = await _setRepository.GetSetWithLegs(setId);
+            var set = await _repository.SetRepository.GetSetWithLegs(setId);
             if (set == null)
             {
                 return;
             }
 
             var legsNeededToWin = (int)set.BestOfLegs;
-            var setResults = await _setResultRepository.GetSetResultsBySetId(setId);
+            var setResults = await _repository.SetResultRepository.GetSetResultsBySetId(setId);
 
             if (setResults.Any(s => s.LegsWon >= legsNeededToWin))
             {
@@ -234,7 +219,7 @@ namespace DartsGame.Services
         {
             if (set.IsFinished) return;
 
-            var setResults = await _setResultRepository.GetSetResultsBySetId(set.SetId);
+            var setResults = await _repository.SetResultRepository.GetSetResultsBySetId(set.SetId);
 
             var legsNeededToWin = (int)set.BestOfLegs;
             var setWinner = setResults.FirstOrDefault(s => s.LegsWon >= legsNeededToWin);
@@ -249,7 +234,7 @@ namespace DartsGame.Services
 
                 if (!matchCompleted)
                 {
-                    var match = await _matchRepository.GetById(set.MatchId);
+                    var match = await _repository.MatchRepository.GetById(set.MatchId);
                     await CreateNewSetIfNeeded(match);
                 }
             }
@@ -271,7 +256,7 @@ namespace DartsGame.Services
                 await _context.SaveChangesAsync();
             }
 
-            var playerIds = await _matchRepository.GetMatchPlayerIds(matchId);
+            var playerIds = await _repository.MatchRepository.GetMatchPlayerIds(matchId);
 
             foreach (var playerId in playerIds)
             {
@@ -281,11 +266,11 @@ namespace DartsGame.Services
 
         private async Task<bool> CheckMatchCompleted(Guid matchId)
         {
-            var match = await _matchRepository.GetById(matchId);
+            var match = await _repository.MatchRepository.GetById(matchId);
             if (match == null) { return false; }
 
             var setsNeededToWin = (int)match.BestOfSets;
-            var setsWonByPlayer = await _setRepository.GetSetsWonByPlayers(matchId);
+            var setsWonByPlayer = await _repository.SetRepository.GetSetsWonByPlayers(matchId);
 
             var matchWinner = setsWonByPlayer.FirstOrDefault(p => p.Value >= setsNeededToWin);
 
@@ -295,7 +280,7 @@ namespace DartsGame.Services
                 {
                     await CompleteMatch(matchId, matchWinner.Key);
 
-                    var loserIds = await _matchRepository.GetMatchPlayerIds(matchId);
+                    var loserIds = await _repository.MatchRepository.GetMatchPlayerIds(matchId);
                     loserIds.Remove(matchWinner.Key);
 
                     await UpdatePlayersStats(matchWinner.Key, loserIds);
@@ -329,32 +314,23 @@ namespace DartsGame.Services
 
         private async Task CreateNewLegIfNeeded(Guid setId)
         {
-            var set = await _setRepository.GetSetWithLegs(setId);
+            var set = await _repository.SetRepository.GetSetWithLegs(setId);
 
             if (set == null || set.IsFinished)
             {
                 return;
             }
 
-            if (await _legRepository.HasUnfinishedLegs(setId))
+            if (await _repository.LegRepository.HasUnfinishedLegs(setId))
             {
                 return;
             }
 
-            var match = await _matchRepository.GetById(set.MatchId);
-            var players = await _matchRepository.GetMatchPlayerIds(match.MatchId);
+            var match = await _repository.MatchRepository.GetById(set.MatchId);
+            var players = await _repository.MatchRepository.GetMatchPlayerIds(match.MatchId);
 
-            //var legsNeededToWin = (int)set.BestOfLegs;
-            //var setResults = await _setResultRepository.GetSetResultsBySetId(setId);
-
-            //if (setResults.Any(s => s.LegsWon >= legsNeededToWin))
-            //{
-            //    await CompleteSet(set);
-            //}
-            //else
-            //{
             var startingPlayer = await DetermineNextStartingPlayer(set, players);
-            var lastLegNumber = await _legRepository.GetLastLegNumber(setId);
+            var lastLegNumber = await _repository.LegRepository.GetLastLegNumber(setId);
 
             var newLeg = new Leg(
                 Guid.NewGuid(),
@@ -389,7 +365,7 @@ namespace DartsGame.Services
 
             _context.Turns.Add(initialTurn);
             await _context.SaveChangesAsync();
-            //}
+            
         }
 
         private async Task<Guid> DetermineNextStartingPlayer(Set set, List<Guid> players)
@@ -398,32 +374,33 @@ namespace DartsGame.Services
             if (lastLeg == null)
                 return players.First();
 
-            var lastStartingTurn = await _turnRepository.GetFirstTurnByLegId(lastLeg.LegId);
+            var lastLegStartingTurn = await _repository.TurnRepository.GetFirstTurnByLegId(lastLeg.LegId);
 
-            if (lastStartingTurn == null)
+            if (lastLegStartingTurn == null)
                 return players.First();
 
-            var lastStartingPlayerIndex = players.IndexOf(lastStartingTurn.PlayerId);
-            return players[(lastStartingPlayerIndex + 1) % players.Count];
+            var lastLegStartingPlayerIndex = players.IndexOf(lastLegStartingTurn.PlayerId);
+            return players[(lastLegStartingPlayerIndex + 1) % players.Count];
         }
 
         private async Task CreateNewSetIfNeeded(Match match)
         {
             if (match.IsFinished) { return; }
 
-            if (await _setRepository.HasUnfinishedSets(match.MatchId))
+            if (await _repository.SetRepository.HasUnfinishedSets(match.MatchId))
             {
                 return;
             }
 
-            var players = await _matchRepository.GetMatchPlayerIds(match.MatchId);
-            var lastSetNumber = await _setRepository.GetLastSetNumber(match.MatchId);
+            var players = await _repository.MatchRepository.GetMatchPlayerIds(match.MatchId);
+            var lastSetNumber = await _repository.SetRepository.GetLastSetNumber(match.MatchId);
             var lastSet = await _context.Sets
                 .Where(s => s.MatchId == match.MatchId && s.SetNumber == lastSetNumber)
                 .FirstOrDefaultAsync();
 
-            var newSet = new Set(Guid.NewGuid())
+            var newSet = new Set()
             {
+                SetId = Guid.NewGuid(),
                 MatchId = match.MatchId,
                 BestOfLegs = lastSet.BestOfLegs,
                 SetNumber = lastSetNumber + 1,
@@ -451,7 +428,7 @@ namespace DartsGame.Services
                     PlayerId = playerId,
                     LegsWon = 0
                 };
-                await _setResultRepository.Create(setResult);
+                 _context.SetResults.Add(setResult);
 
                 var legScore = new LegScore
                 {

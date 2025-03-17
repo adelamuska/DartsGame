@@ -19,10 +19,7 @@ namespace DartsGame.Entities
         public ICollection<Set> Sets { get; set; } = new List<Set>();
         public ICollection<MatchStats> MatchStats { get; set; } = new List<MatchStats>();
 
-        public Match()
-        {
-
-        }
+       
 
         public Match(Guid matchId, DateTime startTime, DateTime? endTime, BestOfSets bestOfSets, StartingScore startingScore, bool isFinished)
         {

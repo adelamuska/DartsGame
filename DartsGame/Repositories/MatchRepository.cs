@@ -1,10 +1,11 @@
 ﻿using DartsGame.Data;
 using DartsGame.Entities;
+using DartsGame.Interfaces.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Repositories
 {
-    public class MatchRepository : BaseRepository<Match>
+    public class MatchRepository : BaseRepository<Match>, IMatchRepository
     {
         public MatchRepository(AppDbContext context) : base(context) { }
 
@@ -13,12 +14,12 @@ namespace DartsGame.Repositories
             return await _context.Matches.Include(m => m.Sets.OrderBy(s => s.SetNumber)).ThenInclude(s => s.Legs).FirstOrDefaultAsync(m => m.MatchId == matchId && !m.IsDeleted);
         }
 
-        public async Task<Match> GetMatchWithSets(Guid matchId)
-        {
-            return await _context.Matches
-                .Include(m => m.Sets)
-                .FirstOrDefaultAsync(m => m.MatchId == matchId);
-        }
+        //public async Task<Match> GetMatchWithSets(Guid matchId)
+        //{
+        //    return await _context.Matches
+        //        .Include(m => m.Sets)
+        //        .FirstOrDefaultAsync(m => m.MatchId == matchId);
+        //}
 
         public async Task<List<Guid>> GetMatchPlayerIds(Guid matchId)
         {
@@ -28,16 +29,6 @@ namespace DartsGame.Repositories
                 .ToListAsync();
         }
 
-        //public async Task CompleteMatch(Guid matchId, Guid winnerPlayerId)
-        //{
-        //    var match = await _context.Matches.FindAsync(matchId);
-        //    if (match != null && !match.IsFinished)
-        //    {
-        //        match.IsFinished = true;
-        //        match.WinnerPlayerId = winnerPlayerId;
-        //        match.EndTime = DateTime.Now;
-        //        await _context.SaveChangesAsync();
-        //    }
-        //}
+      
     }
 }

@@ -2,12 +2,13 @@
 using DartsGame.Data;
 using DartsGame.DTO;
 using DartsGame.Entities;
+using DartsGame.Interfaces.ServiceInterfaces;
 using DartsGame.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Services
 {
-    public class TurnThrowService
+    public class TurnThrowService : ITurnThrowService
     {
         public readonly TurnThrowRepository _turnThrowRepository;
         public readonly IMapper _mapper;
@@ -17,11 +18,11 @@ namespace DartsGame.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<TurnThrowDTO>> GetAll()
-        {
-            var turnsThrow = await _turnThrowRepository.GetAll();
-            return _mapper.Map<IEnumerable<TurnThrowDTO>>(turnsThrow);
-        }
+        //public async Task<IEnumerable<TurnThrowDTO>> GetAll()
+        //{
+        //    var turnsThrow = await _turnThrowRepository.GetAll();
+        //    return _mapper.Map<IEnumerable<TurnThrowDTO>>(turnsThrow);
+        //}
 
         public async Task<TurnThrowDTO> GetById(Guid turnThrowId)
         {
@@ -33,44 +34,44 @@ namespace DartsGame.Services
             return _mapper.Map<TurnThrowDTO>(turnThrow);
         }
 
-        public async Task<TurnThrowDTO> AddTurnThrow(TurnThrowDTO turnThrowDTO)
-        {
-            if (turnThrowDTO == null)
-            {
-                throw new ArgumentNullException("Turn throw cannot be null.");
-            }
+        //public async Task<TurnThrowDTO> AddTurnThrow(TurnThrowDTO turnThrowDTO)
+        //{
+        //    if (turnThrowDTO == null)
+        //    {
+        //        throw new ArgumentNullException("Turn throw cannot be null.");
+        //    }
 
-            var turnThrowEntity = _mapper.Map<TurnThrow>(turnThrowDTO);
-            var addedTurnThrow = await _turnThrowRepository.Create(turnThrowEntity);
+        //    var turnThrowEntity = _mapper.Map<TurnThrow>(turnThrowDTO);
+        //    var addedTurnThrow = await _turnThrowRepository.Create(turnThrowEntity);
 
-            if (addedTurnThrow == null)
-            {
-                throw new InvalidOperationException("Failed to add turn throw.");
-            }
+        //    if (addedTurnThrow == null)
+        //    {
+        //        throw new InvalidOperationException("Failed to add turn throw.");
+        //    }
 
-            return _mapper.Map<TurnThrowDTO>(addedTurnThrow);
-        }
+        //    return _mapper.Map<TurnThrowDTO>(addedTurnThrow);
+        //}
 
-        public async Task<TurnThrowDTO> UpdateTurnThrow(Guid turnThrowId, TurnThrowDTO turnThrowDTO)
-        {
-            if (turnThrowDTO == null)
-            {
-                throw new ArgumentNullException(nameof(turnThrowDTO), "Turn throw cannot be null.");
-            }
+        //public async Task<TurnThrowDTO> UpdateTurnThrow(Guid turnThrowId, TurnThrowDTO turnThrowDTO)
+        //{
+        //    if (turnThrowDTO == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(turnThrowDTO), "Turn throw cannot be null.");
+        //    }
 
-            var turnThrowById = await _turnThrowRepository.GetById(turnThrowId);
-            if (turnThrowById == null)
-            {
-                throw new KeyNotFoundException($"Turn throw with ID {turnThrowId} not found.");
-            }
+        //    var turnThrowById = await _turnThrowRepository.GetById(turnThrowId);
+        //    if (turnThrowById == null)
+        //    {
+        //        throw new KeyNotFoundException($"Turn throw with ID {turnThrowId} not found.");
+        //    }
 
-            var turnThrowEntity = _mapper.Map(turnThrowDTO, turnThrowById);
-            turnThrowEntity.TurnThrowId = turnThrowId;
+        //    var turnThrowEntity = _mapper.Map(turnThrowDTO, turnThrowById);
+        //    turnThrowEntity.TurnThrowId = turnThrowId;
 
-            var updatedTurnThrow = await _turnThrowRepository.Update(turnThrowEntity);
+        //    var updatedTurnThrow = await _turnThrowRepository.Update(turnThrowEntity);
 
-            return _mapper.Map<TurnThrowDTO>(updatedTurnThrow);
-        }
+        //    return _mapper.Map<TurnThrowDTO>(updatedTurnThrow);
+        //}
 
         public async Task DeleteTurnThrow(Guid turnThrowId)
         {

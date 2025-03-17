@@ -1,5 +1,6 @@
 ﻿using DartsGame.Data;
 using DartsGame.Entities;
+using DartsGame.Interfaces.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Repositories
@@ -15,15 +16,15 @@ namespace DartsGame.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public virtual async Task<T> Create(T entity)
-        {
+        //public virtual async Task<T> Create(T entity)
+        //{
 
 
-            await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync();
-            return entity;
+        //    await _dbSet.AddAsync(entity);
+        //    await _context.SaveChangesAsync();
+        //    return entity;
 
-        }
+        //}
 
         public virtual async Task<IEnumerable<T>> GetAll()
         {
@@ -35,12 +36,12 @@ namespace DartsGame.Repositories
             return await _dbSet.FindAsync(Id);
         }
 
-        public virtual async Task<T> Update(T entity)
-        {
-            _dbSet.Update(entity);
-            await _context.SaveChangesAsync();
-            return entity;
-        }
+        //public virtual async Task<T> Update(T entity)
+        //{
+        //    _dbSet.Update(entity);
+        //    await _context.SaveChangesAsync();
+        //    return entity;
+        //}
 
         public virtual async Task Delete(Guid Id)
         {

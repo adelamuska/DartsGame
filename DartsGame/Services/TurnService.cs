@@ -3,7 +3,7 @@ using DartsGame.Data;
 using DartsGame.DTO;
 using DartsGame.Entities;
 using DartsGame.Helpers;
-using DartsGame.Interfaces;
+using DartsGame.Interfaces.ServiceInterfaces;
 using DartsGame.Repositories;
 using DartsGame.RequestDTOs;
 using Microsoft.EntityFrameworkCore;
@@ -31,11 +31,11 @@ namespace DartsGame.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<TurnDTO>> GetAll()
-        {
-            var turns = await _turnRepository.GetAll();
-            return _mapper.Map<IEnumerable<TurnDTO>>(turns);
-        }
+        //public async Task<IEnumerable<TurnDTO>> GetAll()
+        //{
+        //    var turns = await _turnRepository.GetAll();
+        //    return _mapper.Map<IEnumerable<TurnDTO>>(turns);
+        //}
 
         public async Task<TurnDTO> GetById(Guid turnId)
         {
@@ -47,43 +47,43 @@ namespace DartsGame.Services
             return _mapper.Map<TurnDTO>(turn);
         }
 
-        public async Task<TurnDTO> AddTurn(TurnDTO turnDTO)
-        {
-            if (turnDTO == null)
-            {
-                throw new ArgumentNullException("Turn cannot be null.");
-            }
+        //public async Task<TurnDTO> AddTurn(TurnDTO turnDTO)
+        //{
+        //    if (turnDTO == null)
+        //    {
+        //        throw new ArgumentNullException("Turn cannot be null.");
+        //    }
 
-            var turnEntity = _mapper.Map<Turn>(turnDTO);
-            var addedTurn = await _turnRepository.Create(turnEntity);
+        //    var turnEntity = _mapper.Map<Turn>(turnDTO);
+        //    var addedTurn = await _turnRepository.Create(turnEntity);
 
-            if (addedTurn == null)
-            {
-                throw new InvalidOperationException("Failed to add turn.");
-            }
+        //    if (addedTurn == null)
+        //    {
+        //        throw new InvalidOperationException("Failed to add turn.");
+        //    }
 
-            return _mapper.Map<TurnDTO>(addedTurn);
-        }
+        //    return _mapper.Map<TurnDTO>(addedTurn);
+        //}
 
-        public async Task<TurnDTO> UpdateTurn(Guid turnId, TurnDTO turnDTO)
-        {
-            if (turnDTO == null)
-            {
-                throw new ArgumentNullException("Turn cannot be null.");
-            }
+        //public async Task<TurnDTO> UpdateTurn(Guid turnId, TurnDTO turnDTO)
+        //{
+        //    if (turnDTO == null)
+        //    {
+        //        throw new ArgumentNullException("Turn cannot be null.");
+        //    }
 
-            var turnById = await _turnRepository.GetById(turnId);
-            if (turnById == null)
-            {
-                throw new KeyNotFoundException($"Turn with ID {turnId} not found.");
-            }
+        //    var turnById = await _turnRepository.GetById(turnId);
+        //    if (turnById == null)
+        //    {
+        //        throw new KeyNotFoundException($"Turn with ID {turnId} not found.");
+        //    }
 
-            var turnEntity = _mapper.Map(turnDTO, turnById);
+        //    var turnEntity = _mapper.Map(turnDTO, turnById);
 
-            var updatedTurn = await _turnRepository.Update(turnEntity);
+        //    var updatedTurn = await _turnRepository.Update(turnEntity);
 
-            return _mapper.Map<TurnDTO>(updatedTurn);
-        }
+        //    return _mapper.Map<TurnDTO>(updatedTurn);
+        //}
 
         public async Task DeleteTurn(Guid turnId)
         {
@@ -98,53 +98,68 @@ namespace DartsGame.Services
             await _turnRepository.Delete(turnId);
         }
 
+
         public async Task ProcessTurn(Match match, TurnThrowRequestDTO turnThrows)
         {
-            var activePlayersIds =await _playerRepository.GetActivePlayerIds(match.MatchId) ;
-
-            var currentLeg = await _legRepository.GetCurrentLeg(match.Sets.Last().SetId);
-
-
-            if (currentLeg == null)
-            {
-                throw new InvalidOperationException("No active leg found.");
-            }
+            var activePlayersIds = await _playerRepository.GetActivePlayerIds(match.MatchId);
+            var currentLeg = await GetCurrentLeg(match);
             if (currentLeg.IsFinished)
             {
                 throw new InvalidOperationException("The current leg is already finished.");
             }
 
-            // Nuk eshte se prish ndonje pune nqs rrijne null, se gjithsesi null do bohen
-            // null ne logjiken e lojes dmth muri, toka, ose s'ka pas nevoje me e gjujt
-            //if (turnThrows.Throw1 == null || turnThrows.Throw2 == null || turnThrows.Throw3 == null)
-            //{
-            //    throw new ArgumentException("All three throws are required to complete the turn.");
-            //}
-
-
-            var firstPlayerId = activePlayersIds.First();
             var currentTurn = await _turnRepository.GetCurrentTurn(currentLeg.LegId);
-
 
             if (currentTurn == null)
             {
                 throw new InvalidOperationException("No active turn found.");
             }
 
+
+            int totalScore = CalculateTotalScore(turnThrows);
+
+            var turnThrow = await SaveTurnThrow(currentTurn.TurnId, turnThrows, totalScore);
+
+            await _gameService.ProcessGameStateAfterTurn(currentLeg.LegId, totalScore, turnThrow.ToString());
+
+            await _context.Entry(currentLeg).ReloadAsync();
+
+            if (!currentLeg.IsFinished)
+            {
+                await CreateNewTurnIfNeeded(currentTurn, activePlayersIds, currentLeg);
+            }
+        }
+
+        private async Task<Leg> GetCurrentLeg(Match match)
+        {
+            var currentLeg = await _legRepository.GetCurrentLeg(match.Sets.Last().SetId);
+
+            if (currentLeg == null)
+            {
+                throw new InvalidOperationException("No active leg found.");
+            }
+
+            return currentLeg;
+        }
+
+        private int CalculateTotalScore(TurnThrowRequestDTO turnThrows)
+        {
             int? throw1Score = ScoreTableHelper.GetScore(turnThrows.Throw1);
             int? throw2Score = ScoreTableHelper.GetScore(turnThrows.Throw2);
             int? throw3Score = ScoreTableHelper.GetScore(turnThrows.Throw3);
 
-            int totalScore = throw1Score.GetValueOrDefault() + throw2Score.GetValueOrDefault() + throw3Score.GetValueOrDefault();
+            return throw1Score.GetValueOrDefault() + throw2Score.GetValueOrDefault() + throw3Score.GetValueOrDefault();
+        }
 
-
+        private async Task<TurnThrow> SaveTurnThrow(Guid currentTurnId, TurnThrowRequestDTO turnThrows, int totalScore)
+        {
             var turnThrow = new TurnThrow
             {
                 TurnThrowId = Guid.NewGuid(),
-                TurnId = currentTurn.TurnId,
-                Throw1 = throw1Score,
-                Throw2 = throw2Score,
-                Throw3 = throw3Score,
+                TurnId = currentTurnId,
+                Throw1 = ScoreTableHelper.GetScore(turnThrows.Throw1),
+                Throw2 = ScoreTableHelper.GetScore(turnThrows.Throw2),
+                Throw3 = ScoreTableHelper.GetScore(turnThrows.Throw3),
                 Score = totalScore,
                 IsDeleted = false
             };
@@ -152,31 +167,27 @@ namespace DartsGame.Services
             _context.TurnThrows.Add(turnThrow);
             await _context.SaveChangesAsync();
 
-            var lastThrow = _context.TurnThrows.OrderBy(t => t.TurnThrowId).Last();
-            await _gameService.ProcessGameStateAfterTurn(currentLeg.LegId, totalScore, lastThrow.ToString());
+            return turnThrow;
+        }
 
-            await _context.Entry(currentLeg).ReloadAsync();
+        private async Task CreateNewTurnIfNeeded(Turn currentTurn, List<Guid> activePlayersIds, Leg currentLeg)
+        {
+            var currentPlayerId = currentTurn.PlayerId;
+            var currentPlayerIndex = activePlayersIds.IndexOf(currentPlayerId);
+            var nextPlayerId = activePlayersIds[(currentPlayerIndex + 1) % activePlayersIds.Count];
 
+            var newTurn = new Turn(
+                Guid.NewGuid(),
+                nextPlayerId,
+                currentLeg.LegId,
+                DateTime.UtcNow,
+                false,
+                false,
+                false
+            );
 
-            if (!currentLeg.IsFinished)
-            {
-                var currentPlayerId = currentTurn.PlayerId;
-                var currentPlayerIndex = activePlayersIds.IndexOf(currentPlayerId);
-                var nextPlayerId = activePlayersIds[(currentPlayerIndex + 1) % activePlayersIds.Count];
-
-                var newTurn = new Turn(
-                    Guid.NewGuid(),
-                    nextPlayerId,
-                    currentLeg.LegId,
-                    DateTime.UtcNow,
-                    false,
-                    false,
-                    false
-                );
-
-                _context.Turns.Add(newTurn);
-                await _context.SaveChangesAsync();
-            }
+            _context.Turns.Add(newTurn);
+            await _context.SaveChangesAsync();
         }
 
 
