@@ -16,13 +16,13 @@ namespace DartsGame.Controllers
             _turnThrowService = turnThrowService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TurnThrowDTO>>> GetAllTurnThrows()
-        {
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<TurnThrowDTO>>> GetAllTurnThrows()
+        //{
 
-            var turnThrows = await _turnThrowService.GetAll();
-            return Ok(turnThrows);
-        }
+        //    var turnThrows = await _turnThrowService.GetAll();
+        //    return Ok(turnThrows);
+        //}
 
 
         [HttpGet("{id}")]
@@ -37,32 +37,32 @@ namespace DartsGame.Controllers
             return Ok(turnThrow);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<TurnThrowDTO>> CreateTurnThrow([FromBody] TurnThrowDTO? turnThrowDTO)
-        {
+        //[HttpPost]
+        //public async Task<ActionResult<TurnThrowDTO>> CreateTurnThrow([FromBody] TurnThrowDTO? turnThrowDTO)
+        //{
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var createdTurnThrow = await _turnThrowService.AddTurnThrow(turnThrowDTO);
-            return CreatedAtAction(nameof(GetTurnThrowById), new { id = createdTurnThrow.TurnThrowId }, createdTurnThrow);
+        //    var createdTurnThrow = await _turnThrowService.AddTurnThrow(turnThrowDTO);
+        //    return CreatedAtAction(nameof(GetTurnThrowById), new { id = createdTurnThrow.TurnThrowId }, createdTurnThrow);
 
-        }
+        //}
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<TurnThrowDTO>> UpdateTurnThrow(Guid id, [FromBody] TurnThrowDTO? turnThrowDTO)
-        {
+        //[HttpPut("{id}")]
+        //public async Task<ActionResult<TurnThrowDTO>> UpdateTurnThrow(Guid id, [FromBody] TurnThrowDTO? turnThrowDTO)
+        //{
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var updatedTurnThrow = await _turnThrowService.UpdateTurnThrow(id, turnThrowDTO);
-            return Ok(updatedTurnThrow);
-        }
+        //    var updatedTurnThrow = await _turnThrowService.UpdateTurnThrow(id, turnThrowDTO);
+        //    return Ok(updatedTurnThrow);
+        //}
 
 
         [HttpDelete("{id}")]

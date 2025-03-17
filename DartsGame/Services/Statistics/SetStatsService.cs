@@ -1,22 +1,21 @@
 ﻿using DartsGame.Data;
-using DartsGame.Interfaces;
+using DartsGame.Interfaces.ServiceInterfaces;
+using DartsGame.Interfaces.ServiceInterfaces.Statistics;
 using DartsGame.Repositories;
 using DartsGame.Repositories.Statistics;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Services.Statistics
 {
-    public class SetStatsService : IStatsService
+    public class SetStatsService : ISetStatsService
     {
         private readonly SetStatsRepository _setStatsRepository;
         private readonly LegStatsService _legStatsService;
-        private readonly LegStatsRepository _legStatsRepository;
 
-        public SetStatsService(SetStatsRepository setStatsRepository, LegStatsService legStatsService, LegStatsRepository legStatsRepository)
+        public SetStatsService(SetStatsRepository setStatsRepository, LegStatsService legStatsService)
         {
             _setStatsRepository = setStatsRepository;
             _legStatsService = legStatsService;
-            _legStatsRepository = legStatsRepository;
         }
 
         public async Task<decimal> CalculatePPD(Guid setId, Guid playerId)

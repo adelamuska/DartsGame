@@ -1,13 +1,14 @@
 ﻿using DartsGame.Data;
 using DartsGame.Entities;
-using DartsGame.Interfaces;
+using DartsGame.Interfaces.ServiceInterfaces;
+using DartsGame.Interfaces.ServiceInterfaces.Statistics;
 using DartsGame.Repositories;
 using DartsGame.Repositories.Statistics;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Services.Statistics
 {
-    public class MatchStatsService : IStatsService
+    public class MatchStatsService : IMatchStatsService
     {
         private readonly MatchStatsRepository _matchStatsRepository;
         private readonly SetStatsService _setStatsService;
@@ -165,27 +166,7 @@ namespace DartsGame.Services.Statistics
 
         public async Task<decimal> CalculateFirst9PPD(Guid matchId, Guid playerId)
         {
-            //metoda me leg
-        //    var legs = await _matchStatsRepository.GetLegsByMatchId(matchId);
-        //    if (legs == null || !legs.Any()) return 0;
-
-            //    double totalFirst9PPD = 0;
-            //    int legCount = 0;
-
-            //    foreach (var leg in legs)
-            //    {
-            //        var legFirst9PPD = await _legStatsService.CalculateFirst9PPD(leg.LegId, playerId);
-            //        if (legFirst9PPD > 0)
-            //        {
-            //            totalFirst9PPD += (double)legFirst9PPD;
-            //            legCount++;
-            //        }
-            //    }
-
-            //    return legCount > 0 ? (decimal)(totalFirst9PPD / legCount) : 0;
-            //}
-
-            // Metoda me set
+           
             var sets = await _matchStatsRepository.GetSetsByMatchId(matchId);
             if (sets == null || !sets.Any()) return 0;
 

@@ -1,4 +1,7 @@
 ﻿using DartsGame.DTO;
+using DartsGame.DTOs;
+using DartsGame.Interfaces;
+using DartsGame.Repositories.Statistics;
 using DartsGame.RequestDTOs;
 using DartsGame.Services;
 using Microsoft.AspNetCore.Http;
@@ -12,18 +15,21 @@ namespace DartsGame.Controllers
     {
         private readonly MatchService _matchService;
 
+
         public MatchController(MatchService matchService)
         {
             _matchService = matchService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MatchDTO>>> GetAllMatches()
+        public async Task<ActionResult<IEnumerable<MatchWithStatsDTO>>> GetAllMatches()
         {
-            var matches = await _matchService.GetAll();
+            var matches = await _matchService.GetAllWithStats();
             return Ok(matches);
 
         }
+
+        
 
         [HttpGet("{id}")]
         public async Task<ActionResult<MatchDTO>> GetMatchById(Guid id)
@@ -37,31 +43,31 @@ namespace DartsGame.Controllers
 
         }
 
-        [HttpPost]
-        public async Task<ActionResult<MatchDTO>> CreateMatch([FromBody] MatchDTO? matchDTO)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[HttpPost]
+        //public async Task<ActionResult<MatchDTO>> CreateMatch([FromBody] MatchDTO? matchDTO)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var createdMatch = await _matchService.AddMatch(matchDTO);
-            return CreatedAtAction(nameof(GetMatchById), new { id = createdMatch.MatchId }, createdMatch);
+        //    var createdMatch = await _matchService.AddMatch(matchDTO);
+        //    return CreatedAtAction(nameof(GetMatchById), new { id = createdMatch.MatchId }, createdMatch);
 
-        }
+        //}
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<MatchDTO>> UpdateMatch(Guid id, [FromBody] MatchDTO? matchDTO)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[HttpPut("{id}")]
+        //public async Task<ActionResult<MatchDTO>> UpdateMatch(Guid id, [FromBody] MatchDTO? matchDTO)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var updatedMatch = await _matchService.UpdateMatch(id, matchDTO);
-            return Ok(updatedMatch);
+        //    var updatedMatch = await _matchService.UpdateMatch(id, matchDTO);
+        //    return Ok(updatedMatch);
 
-        }
+        //}
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteMatch(Guid id)

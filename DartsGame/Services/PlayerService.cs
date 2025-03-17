@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
 using DartsGame.DTO;
 using DartsGame.Entities;
+using DartsGame.Interfaces.ServiceInterfaces;
 using DartsGame.Repositories;
 
 namespace DartsGame.Services
 {
-    public class PlayerService
+    public class PlayerService : IPlayerService
     {
         public readonly PlayerRepository _playerRepository;
         public readonly IMapper _mapper;
@@ -16,11 +17,11 @@ namespace DartsGame.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<PlayerDTO>> GetAll()
-        {
-            var players = await _playerRepository.GetAll();
-            return _mapper.Map<IEnumerable<PlayerDTO>>(players);
-        }
+        //public async Task<IEnumerable<PlayerDTO>> GetAll()
+        //{
+        //    var players = await _playerRepository.GetAll();
+        //    return _mapper.Map<IEnumerable<PlayerDTO>>(players);
+        //}
 
         public async Task<PlayerDTO> GetById(Guid playerId)
         {
@@ -32,44 +33,44 @@ namespace DartsGame.Services
             return _mapper.Map<PlayerDTO>(player);
         }
 
-        public async Task<PlayerDTO> AddPlayer(PlayerDTO playerDTO)
-        {
-            if (playerDTO == null)
-            {
-                throw new ArgumentNullException("Player cannot be null.");
-            }
+        //public async Task<PlayerDTO> AddPlayer(PlayerDTO playerDTO)
+        //{
+        //    if (playerDTO == null)
+        //    {
+        //        throw new ArgumentNullException("Player cannot be null.");
+        //    }
 
-            var playerEntity = _mapper.Map<Player>(playerDTO);
-            var addedPlayer = await _playerRepository.Create(playerEntity);
+        //    var playerEntity = _mapper.Map<Player>(playerDTO);
+        //    var addedPlayer = await _playerRepository.Create(playerEntity);
 
-            if (addedPlayer == null)
-            {
-                throw new InvalidOperationException("Failed to add player.");
-            }
+        //    if (addedPlayer == null)
+        //    {
+        //        throw new InvalidOperationException("Failed to add player.");
+        //    }
 
-            return _mapper.Map<PlayerDTO>(addedPlayer);
-        }
+        //    return _mapper.Map<PlayerDTO>(addedPlayer);
+        //}
 
-        public async Task<PlayerDTO> UpdatePlayer(Guid playerId, PlayerDTO playerDTO)
-        {
-            if (playerDTO == null)
-            {
-                throw new ArgumentNullException("Player cannot be null.");
-            }
+        //public async Task<PlayerDTO> UpdatePlayer(Guid playerId, PlayerDTO playerDTO)
+        //{
+        //    if (playerDTO == null)
+        //    {
+        //        throw new ArgumentNullException("Player cannot be null.");
+        //    }
 
-            var playerById = await _playerRepository.GetById(playerId);
-            if (playerById == null)
-            {
-                throw new KeyNotFoundException($"Player with ID {playerId} not found.");
-            }
+        //    var playerById = await _playerRepository.GetById(playerId);
+        //    if (playerById == null)
+        //    {
+        //        throw new KeyNotFoundException($"Player with ID {playerId} not found.");
+        //    }
 
-            var playerEntity = _mapper.Map(playerDTO, playerById);
-            playerEntity.PlayerId = playerId;
+        //    var playerEntity = _mapper.Map(playerDTO, playerById);
+        //    playerEntity.PlayerId = playerId;
 
-            var updatedPlayer = await _playerRepository.Update(playerEntity);
+        //    var updatedPlayer = await _playerRepository.Update(playerEntity);
 
-            return _mapper.Map<PlayerDTO>(updatedPlayer);
-        }
+        //    return _mapper.Map<PlayerDTO>(updatedPlayer);
+        //}
 
         public async Task DeletePlayer(Guid playerId)
         {

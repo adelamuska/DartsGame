@@ -25,14 +25,14 @@ namespace DartsGame.Controllers
             _matchRepository = matchRepository;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TurnDTO>>> GetAllTurns()
-        {
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<TurnDTO>>> GetAllTurns()
+        //{
 
-            var turns = await _turnService.GetAll();
-            return Ok(turns);
+        //    var turns = await _turnService.GetAll();
+        //    return Ok(turns);
 
-        }
+        //}
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TurnDTO>> GetTurnById(Guid id)
@@ -46,33 +46,33 @@ namespace DartsGame.Controllers
             return Ok(turn);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<TurnDTO>> CreateTurn([FromBody] TurnDTO? turnDTO)
-        {
+        //[HttpPost]
+        //public async Task<ActionResult<TurnDTO>> CreateTurn([FromBody] TurnDTO? turnDTO)
+        //{
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var createdTurn = await _turnService.AddTurn(turnDTO);
-            return CreatedAtAction(nameof(GetTurnById), new { id = createdTurn.TurnId }, createdTurn);
+        //    var createdTurn = await _turnService.AddTurn(turnDTO);
+        //    return CreatedAtAction(nameof(GetTurnById), new { id = createdTurn.TurnId }, createdTurn);
 
-        }
+        //}
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<TurnDTO>> UpdateTurn(Guid id, [FromBody] TurnDTO? turnDTO)
-        {
+        //[HttpPut("{id}")]
+        //public async Task<ActionResult<TurnDTO>> UpdateTurn(Guid id, [FromBody] TurnDTO? turnDTO)
+        //{
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var updatedTurn = await _turnService.UpdateTurn(id, turnDTO);
-            return Ok(updatedTurn);
+        //    var updatedTurn = await _turnService.UpdateTurn(id, turnDTO);
+        //    return Ok(updatedTurn);
 
-        }
+        //}
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteTurn(Guid id)

@@ -1,12 +1,13 @@
 ﻿using DartsGame.Data;
 using DartsGame.DTOs;
 using DartsGame.Entities;
+using DartsGame.Interfaces.ServiceInterfaces.Statistics;
 using DartsGame.Repositories.Statistics;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Services.Statistics
 {
-    public class PlayerStatsService
+    public class PlayerStatsService : IPlayerStatsService
     {
         private readonly PlayerStatsRepository _repository;
 

@@ -1,7 +1,7 @@
 ﻿using DartsGame.DTOs;
 using DartsGame.Entities;
 
-namespace DartsGame.Repositories.Statistics
+namespace DartsGame.Interfaces.RepositoryInterfaces.Statistics
 {
     public interface IPlayerStatsRepository
     {

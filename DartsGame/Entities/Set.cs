@@ -18,9 +18,6 @@ namespace DartsGame.Entities
         public ICollection<SetStats> SetStats { get; set; } = new List<SetStats>();
 
 
-        public Set(Guid setId)
-        {
-            SetId = setId;
-        }
+      
     }
 }

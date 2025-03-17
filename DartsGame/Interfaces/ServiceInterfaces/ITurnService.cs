@@ -1,7 +1,7 @@
 ﻿using DartsGame.Entities;
 using DartsGame.RequestDTOs;
 
-namespace DartsGame.Interfaces
+namespace DartsGame.Interfaces.ServiceInterfaces
 {
     public interface ITurnService
     {

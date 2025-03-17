@@ -1,4 +1,5 @@
 using DartsGame.Data;
+using DartsGame.Interfaces.RepositoryInterfaces;
 using DartsGame.Middleware;
 using DartsGame.Repositories;
 using DartsGame.Repositories.Statistics;
@@ -11,10 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddTransient<LegStatsService>();
-builder.Services.AddTransient<SetStatsService>();
-builder.Services.AddTransient<MatchStatsService>();
-builder.Services.AddTransient<PlayerStatsService>();
+builder.Services.AddScoped<LegStatsService>();
+builder.Services.AddScoped<SetStatsService>();
+builder.Services.AddScoped<MatchStatsService>();
+builder.Services.AddScoped<PlayerStatsService>();
+builder.Services.AddScoped<GameHistoryService>();
+builder.Services.AddScoped<GameHistoryRepository>();
+
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -51,8 +55,10 @@ builder.Services.AddScoped<MatchStatsRepository>();
 
 builder.Services.AddScoped<PlayerStatsRepository>();
 
-builder.Services.AddScoped<StatisticsService>();
 
+
+builder.Services.AddScoped<StatisticsService>();
+builder.Services.AddScoped<IGameRepositoryService, GameRepositoryService>();
 // Game service
 builder.Services.AddScoped<GameFlowService>();
 

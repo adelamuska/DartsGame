@@ -1,10 +1,11 @@
 ﻿using DartsGame.Data;
 using DartsGame.Entities;
+using DartsGame.Interfaces.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Repositories
 {
-    public class LegScoreRepository : BaseRepository<LegScore>
+    public class LegScoreRepository : BaseRepository<LegScore>, ILegScoreRepository
     {
         public LegScoreRepository(AppDbContext context) : base(context) { }
 
@@ -21,15 +22,5 @@ namespace DartsGame.Repositories
                 .FirstOrDefaultAsync(l => l.LegId == legId && l.PlayerId == playerId);
         }
 
-        //public async Task UpdatePlayerRemainingScore(Guid legId, Guid playerId, int remainingScore)
-        //{
-        //    var playerScore = await _legRepository.GetPlayerLegScore(legId, playerId);
-
-        //    if (playerScore != null)
-        //    {
-        //        playerScore.RemainingScore = remainingScore;
-        //        await _context.SaveChangesAsync();
-        //    }
-        //}
     }
 }

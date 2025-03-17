@@ -1,10 +1,11 @@
 ﻿using DartsGame.Data;
 using DartsGame.Entities;
+using DartsGame.Interfaces.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Repositories
 {
-    public class LegRepository : BaseRepository<Leg>
+    public class LegRepository : BaseRepository<Leg>, ILegRepository 
     {
         public LegRepository(AppDbContext context) : base(context) { }
 
@@ -13,25 +14,25 @@ namespace DartsGame.Repositories
             return await _context.Legs.FindAsync(legId);
         }
 
-        public async Task<Leg> GetLegWithScores(Guid legId)
-        {
-            return await _context.Legs
-                .Include(l => l.LegScores)
-                .FirstOrDefaultAsync(l => l.LegId == legId);
-        }
+        //public async Task<Leg> GetLegWithScores(Guid legId)
+        //{
+        //    return await _context.Legs
+        //        .Include(l => l.LegScores)
+        //        .FirstOrDefaultAsync(l => l.LegId == legId);
+        //}
 
-        public async Task<List<LegScore>> GetLegScores(Guid legId)
-        {
-            return await _context.LegScores.Where(l => l.LegId == legId).ToListAsync();
-        }
+        //public async Task<List<LegScore>> GetLegScores(Guid legId)
+        //{
+        //    return await _context.LegScores.Where(l => l.LegId == legId).ToListAsync();
+        //}
 
-        public async Task<Leg> GetNextUnfinishedLeg(Guid setId)
-        {
-            return await _context.Legs
-                .Where(l => l.SetId == setId && !l.IsFinished)
-                .OrderBy(l => l.LegNumber)
-                .FirstOrDefaultAsync();
-        }
+        //public async Task<Leg> GetNextUnfinishedLeg(Guid setId)
+        //{
+        //    return await _context.Legs
+        //        .Where(l => l.SetId == setId && !l.IsFinished)
+        //        .OrderBy(l => l.LegNumber)
+        //        .FirstOrDefaultAsync();
+        //}
 
         public async Task<int> GetLastLegNumber(Guid setId)
         {

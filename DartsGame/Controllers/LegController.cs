@@ -24,14 +24,14 @@ namespace DartsGame.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<LegDTO>>> GetAllLegs()
-        {
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<LegDTO>>> GetAllLegs()
+        //{
 
-            var legs = await _legService.GetAll();
-            return Ok(legs);
+        //    var legs = await _legService.GetAll();
+        //    return Ok(legs);
 
-        }
+        //}
 
         [HttpGet("{id}")]
         public async Task<ActionResult<LegDTO>> GetLegById(Guid id)
@@ -45,32 +45,32 @@ namespace DartsGame.Controllers
 
         }
 
-        [HttpPost]
-        public async Task<ActionResult<LegDTO>> CreateLeg([FromBody] LegDTO? legDTO)
-        {
+        //[HttpPost]
+        //public async Task<ActionResult<LegDTO>> CreateLeg([FromBody] LegDTO? legDTO)
+        //{
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var createdLeg = await _legService.AddLeg(legDTO);
-            return CreatedAtAction(nameof(GetLegById), new { id = createdLeg.LegId }, createdLeg);
+        //    var createdLeg = await _legService.AddLeg(legDTO);
+        //    return CreatedAtAction(nameof(GetLegById), new { id = createdLeg.LegId }, createdLeg);
 
-        }
+        //}
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<LegDTO>> UpdateLeg(Guid id, [FromBody] LegDTO? legDTO)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[HttpPut("{id}")]
+        //public async Task<ActionResult<LegDTO>> UpdateLeg(Guid id, [FromBody] LegDTO? legDTO)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            var updtatedLeg = await _legService.UpdateLeg(id, legDTO);
-            return Ok(updtatedLeg);
+        //    var updtatedLeg = await _legService.UpdateLeg(id, legDTO);
+        //    return Ok(updtatedLeg);
 
-        }
+        //}
 
 
         [HttpDelete("{id}")]
@@ -82,29 +82,29 @@ namespace DartsGame.Controllers
 
         }
 
-        [HttpPost("startLeg/{matchId}")]
-        public async Task<IActionResult> StartLeg(Guid matchId)
-        {
-            if (matchId == Guid.Empty)
-            {
-                return BadRequest("Invalid match ID.");
-            }
+        //[HttpPost("startLeg/{matchId}")]
+        //public async Task<IActionResult> StartLeg(Guid matchId)
+        //{
+        //    if (matchId == Guid.Empty)
+        //    {
+        //        return BadRequest("Invalid match ID.");
+        //    }
 
 
-            var match = await _matchRepository.GetById(matchId);
+        //    var match = await _matchRepository.GetById(matchId);
 
 
-            if (match == null)
-            {
-                return NotFound("Match not found.");
-            }
+        //    if (match == null)
+        //    {
+        //        return NotFound("Match not found.");
+        //    }
 
 
-            var leg = await _legService.StartLeg(match);
+        //    var leg = await _legService.StartLeg(match);
 
 
-            return CreatedAtAction(nameof(GetLegById), new { id = leg.LegId }, leg);
+        //    return CreatedAtAction(nameof(GetLegById), new { id = leg.LegId }, leg);
 
-        }
+        // }
     }
 }

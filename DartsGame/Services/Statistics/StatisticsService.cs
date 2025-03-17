@@ -1,9 +1,10 @@
 ﻿using DartsGame.Data;
 using DartsGame.Entities;
+using DartsGame.Interfaces.ServiceInterfaces.Statistics;
 
 namespace DartsGame.Services.Statistics
 {
-    public class StatisticsService
+    public class StatisticsService : IStatisticsService
     {
         private readonly AppDbContext _context;
         private readonly LegStatsService _legStatsService;

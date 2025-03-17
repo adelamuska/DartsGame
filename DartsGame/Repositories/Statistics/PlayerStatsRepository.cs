@@ -1,6 +1,7 @@
 ﻿using DartsGame.Data;
 using DartsGame.DTOs;
 using DartsGame.Entities;
+using DartsGame.Interfaces.RepositoryInterfaces.Statistics;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Repositories.Statistics

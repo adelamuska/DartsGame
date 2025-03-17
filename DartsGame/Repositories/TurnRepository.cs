@@ -1,11 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 using DartsGame.Data;
 using DartsGame.Entities;
+using DartsGame.Interfaces.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace DartsGame.Repositories
 {
-    public class TurnRepository : BaseRepository<Turn>
+    public class TurnRepository : BaseRepository<Turn>, ITurnRepository
     {
         public TurnRepository(AppDbContext context) : base(context) { }
 
@@ -25,35 +26,7 @@ namespace DartsGame.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        //public async Task MarkTurnAsBusted(Guid turnId)
-        //{
-        //    var turn = await _context.Turns.FindAsync(turnId);
-        //    if (turn != null)
-        //    {
-        //        turn.IsBusted = true;
-        //        await _context.SaveChangesAsync();
-        //    }
-        //}
-
-        //public async Task MarkTurnAsCheckoutSuccess(Guid turnId)
-        //{
-        //    var turn = await _context.Turns.FindAsync(turnId);
-        //    if (turn != null)
-        //    {
-        //        turn.IsCheckoutSuccess = true;
-        //        await _context.SaveChangesAsync();
-        //    }
-        //}
-
-        //public async Task MarkTurnAsCheckoutAttempt(Guid turnId)
-        //{
-        //    var turn = await _context.Turns.FindAsync(turnId);
-        //    if (turn != null)
-        //    {
-        //        turn.IsCheckoutAttempt = true;
-        //        await _context.SaveChangesAsync();
-        //    }
-        //}
+      
 
         public async Task<Turn> GetCurrentTurn(Guid legId)
         {

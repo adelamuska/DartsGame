@@ -1,4 +1,5 @@
 ﻿using DartsGame.Entities;
+using DartsGame.Repositories.Statistics;
 using DartsGame.Services.Statistics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +11,25 @@ namespace DartsGame.Controllers.Statistics
     public class MatchStatsController : ControllerBase
     {
         private readonly MatchStatsService _matchStats;
+        private readonly GameHistoryRepository _gameHistoryRepository;
 
-        public MatchStatsController(MatchStatsService matchStatsService) 
+        public MatchStatsController(MatchStatsService matchStatsService, GameHistoryRepository gameHistoryRepository) 
         { 
             _matchStats = matchStatsService;
+            _gameHistoryRepository = gameHistoryRepository;
+        }
+
+        [HttpGet("history/{matchId}")]
+        public async Task<IActionResult> GetMatchStats(Guid matchId)
+        {
+            var matchStats = await _gameHistoryRepository.GetMatchStatsByMatchId(matchId);
+
+            if (matchStats == null || !matchStats.Any())
+            {
+                return NotFound("No stats found for the given match.");
+            }
+
+            return Ok(matchStats);
         }
 
         [HttpGet("match/{matchId}/player/{playerId}")]
